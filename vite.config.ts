@@ -6,16 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
-    exclude: [
-      "@codemirror/commands",
-      "@codemirror/language",
-      "@codemirror/state",
-      "@codemirror/view",
-      "@codemirror/lang-markdown",
-      "@codemirror/search",
-      "@codemirror/theme-one-dark",
-      "@lezer/highlight",
-    ],
+    exclude: ["@codemirror/lang-markdown", "@codemirror/theme-one-dark"],
   },
   build: {
     rollupOptions: {

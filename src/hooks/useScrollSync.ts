@@ -13,7 +13,7 @@ export const useScrollSync = (): ScrollSyncHook => {
   const previewRef = useRef<HTMLDivElement>(null);
   const editorScrollRef = useRef<HTMLElement | null>(null);
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
-  const syncTimeoutRef = useRef<number | null>(null);
+  const syncAnimationFrameRef = useRef<number | null>(null);
   const isScrollingRef = useRef<{ editor: boolean; preview: boolean }>({
     editor: false,
     preview: false,
@@ -23,89 +23,87 @@ export const useScrollSync = (): ScrollSyncHook => {
     setIsSyncEnabled((prev) => !prev);
   }, []);
 
-  // Sync preview scroll to match editor scroll
-  const syncPreviewToEditor = useCallback(
-    (scrollTop: number, scrollHeight: number, clientHeight: number) => {
+  // Generic scroll synchronization function
+  const syncScroll = useCallback(
+    (
+      sourceRef: React.RefObject<HTMLElement>,
+      targetRef: React.RefObject<HTMLElement>,
+      isSourceScrolling: boolean,
+      setSourceScrolling: (value: boolean) => void,
+      scrollTop: number,
+      scrollHeight: number,
+      clientHeight: number
+    ) => {
       if (
-        !previewRef.current ||
+        !sourceRef.current ||
+        !targetRef.current ||
         !isSyncEnabled ||
-        isScrollingRef.current.preview
+        isSourceScrolling
       )
         return;
 
-      isScrollingRef.current.editor = true;
+      setSourceScrolling(true);
 
       // Calculate scroll percentage
       const maxScroll = Math.max(0, scrollHeight - clientHeight);
       const scrollPercentage =
         maxScroll > 0 ? Math.min(1, Math.max(0, scrollTop / maxScroll)) : 0;
 
-      // Apply to preview with smooth scrolling
-      const previewMaxScroll = Math.max(
+      // Apply to target with immediate scrolling
+      const targetMaxScroll = Math.max(
         0,
-        previewRef.current.scrollHeight - previewRef.current.clientHeight
+        targetRef.current.scrollHeight - targetRef.current.clientHeight
       );
-      const previewScrollTop = previewMaxScroll * scrollPercentage;
+      const targetScrollTop = targetMaxScroll * scrollPercentage;
 
-      previewRef.current.scrollTo({
-        top: previewScrollTop,
-        behavior: "auto", // Use auto for immediate sync
+      targetRef.current.scrollTo({
+        top: targetScrollTop,
+        behavior: "auto",
       });
 
-      // Clear any existing timeout
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
+      // Clear any existing animation frame
+      if (syncAnimationFrameRef.current) {
+        cancelAnimationFrame(syncAnimationFrameRef.current);
       }
 
-      // Reset flag after a short delay
-      syncTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current.editor = false;
-      }, 150);
+      // Reset flag using requestAnimationFrame for better performance
+      syncAnimationFrameRef.current = requestAnimationFrame(() => {
+        setSourceScrolling(false);
+      });
     },
     [isSyncEnabled]
+  );
+
+  // Sync preview scroll to match editor scroll
+  const syncPreviewToEditor = useCallback(
+    (scrollTop: number, scrollHeight: number, clientHeight: number) => {
+      syncScroll(
+        editorScrollRef,
+        previewRef,
+        isScrollingRef.current.preview,
+        (value) => (isScrollingRef.current.editor = value),
+        scrollTop,
+        scrollHeight,
+        clientHeight
+      );
+    },
+    [syncScroll]
   );
 
   // Sync editor scroll to match preview scroll
   const syncEditorToPreview = useCallback(
     (scrollTop: number, scrollHeight: number, clientHeight: number) => {
-      if (
-        !editorScrollRef.current ||
-        !isSyncEnabled ||
-        isScrollingRef.current.editor
-      )
-        return;
-
-      isScrollingRef.current.preview = true;
-
-      // Calculate scroll percentage
-      const maxScroll = Math.max(0, scrollHeight - clientHeight);
-      const scrollPercentage =
-        maxScroll > 0 ? Math.min(1, Math.max(0, scrollTop / maxScroll)) : 0;
-
-      // Apply to editor
-      const editorMaxScroll = Math.max(
-        0,
-        editorScrollRef.current.scrollHeight -
-          editorScrollRef.current.clientHeight
+      syncScroll(
+        previewRef,
+        editorScrollRef,
+        isScrollingRef.current.editor,
+        (value) => (isScrollingRef.current.preview = value),
+        scrollTop,
+        scrollHeight,
+        clientHeight
       );
-      const editorScrollTop = editorMaxScroll * scrollPercentage;
-
-      editorScrollRef.current.scrollTo({
-        top: editorScrollTop,
-        behavior: "auto",
-      });
-
-      // Clear any existing timeout
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-
-      // Reset flag after a short delay
-      syncTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current.preview = false;
-      }, 150);
     },
-    [isSyncEnabled]
+    [syncScroll]
   );
 
   // Create CodeMirror scroll extension
@@ -146,8 +144,8 @@ export const useScrollSync = (): ScrollSyncHook => {
 
     return () => {
       previewElement.removeEventListener("scroll", handlePreviewScroll);
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
+      if (syncAnimationFrameRef.current) {
+        cancelAnimationFrame(syncAnimationFrameRef.current);
       }
     };
   }, [syncEditorToPreview]);

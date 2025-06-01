@@ -15,6 +15,152 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
+// Extract markdown component definitions for better organization
+const markdownComponents = {
+  // Enhanced task lists
+  input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input
+      {...props}
+      className="mr-3 w-4 h-4 accent-blue-600 rounded"
+      disabled
+    />
+  ),
+  // Enhanced tables
+  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+    <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
+      <table
+        {...props}
+        className="min-w-full divide-y theme-border"
+      />
+    </div>
+  ),
+  th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => (
+    <th
+      {...props}
+      className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
+    />
+  ),
+  td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => (
+    <td
+      {...props}
+      className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
+    />
+  ),
+  // Enhanced code blocks
+  pre: (props: React.PreHTMLAttributes<HTMLPreElement>) => (
+    <pre
+      {...props}
+      className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
+    />
+  ),
+  code: (props: CodeProps) => {
+    const { inline, className, children } = props;
+    if (inline) {
+      return (
+        <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
+          {children}
+        </code>
+      );
+    } else {
+      return <code className={className}>{children}</code>;
+    }
+  },
+  // Enhanced headings with proper left alignment
+  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h1
+      {...props}
+      className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border text-left"
+    />
+  ),
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h2
+      {...props}
+      className="text-2xl font-bold theme-text mb-3 mt-5 text-left"
+    />
+  ),
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h3
+      {...props}
+      className="text-xl font-semibold theme-text mb-2 mt-4 text-left"
+    />
+  ),
+  h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h4
+      {...props}
+      className="text-lg font-semibold theme-text mb-2 mt-3 text-left"
+    />
+  ),
+  h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h5
+      {...props}
+      className="text-base font-semibold theme-text mb-2 mt-3 text-left"
+    />
+  ),
+  h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h6
+      {...props}
+      className="text-sm font-semibold theme-text mb-2 mt-3 text-left"
+    />
+  ),
+  // Enhanced paragraphs
+  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+    <p
+      {...props}
+      className="mb-4 theme-text-secondary text-left"
+    />
+  ),
+  // Enhanced links
+  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a
+      {...props}
+      className="text-blue-600 hover:underline"
+      target="_blank"
+      rel="noopener noreferrer"
+    />
+  ),
+  // Enhanced lists
+  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+    <ul
+      {...props}
+      className="list-disc list-inside mb-4 theme-text-secondary text-left"
+    />
+  ),
+  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
+    <ol
+      {...props}
+      className="list-decimal list-inside mb-4 theme-text-secondary text-left"
+    />
+  ),
+  li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
+    <li {...props} className="mb-2 text-left" />
+  ),
+  // Enhanced blockquotes
+  blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
+    <blockquote
+      {...props}
+      className="border-l-4 border-blue-500 pl-4 py-1 my-4 theme-text-muted italic text-left"
+    />
+  ),
+  // Enhanced strong/emphasis
+  strong: (props: React.HTMLAttributes<HTMLElement>) => (
+    <strong {...props} className="font-bold theme-text" />
+  ),
+  em: (props: React.HTMLAttributes<HTMLElement>) => (
+    <em {...props} className="italic" />
+  ),
+  // Images
+  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img
+      {...props}
+      className="max-w-full h-auto rounded-lg my-4 shadow-md"
+    />
+  ),
+  // Horizontal rule
+  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
+    <hr {...props} className="border-t theme-border my-6" />
+  ),
+};
+
 const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
   const handleCopyHTML = async () => {
     // Get the rendered HTML from the preview content
@@ -133,146 +279,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
               {content ? (
                 <Markdown
                   remarkPlugins={[remarkGfm]}
-                  components={{
-                    // Enhanced task lists
-                    input: (props) => (
-                      <input
-                        {...props}
-                        className="mr-3 w-4 h-4 accent-blue-600 rounded"
-                        disabled
-                      />
-                    ),
-                    // Enhanced tables
-                    table: (props) => (
-                      <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
-                        <table
-                          {...props}
-                          className="min-w-full divide-y theme-border"
-                        />
-                      </div>
-                    ),
-                    th: (props) => (
-                      <th
-                        {...props}
-                        className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
-                      />
-                    ),
-                    td: (props) => (
-                      <td
-                        {...props}
-                        className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
-                      />
-                    ),
-                    // Enhanced code blocks - These will be handled by CSS variables
-                    pre: (props) => (
-                      <pre
-                        {...props}
-                        className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
-                      />
-                    ),
-                    code: (props: CodeProps) => {
-                      const { inline, className, children } = props;
-                      if (inline) {
-                        return (
-                          <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
-                            {children}
-                          </code>
-                        );
-                      } else {
-                        return <code className={className}>{children}</code>;
-                      }
-                    },
-                    // Enhanced headings with proper left alignment
-                    h1: (props) => (
-                      <h1
-                        {...props}
-                        className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border text-left"
-                      />
-                    ),
-                    h2: (props) => (
-                      <h2
-                        {...props}
-                        className="text-2xl font-bold theme-text mb-3 mt-5 text-left"
-                      />
-                    ),
-                    h3: (props) => (
-                      <h3
-                        {...props}
-                        className="text-xl font-semibold theme-text mb-2 mt-4 text-left"
-                      />
-                    ),
-                    h4: (props) => (
-                      <h4
-                        {...props}
-                        className="text-lg font-semibold theme-text mb-2 mt-3 text-left"
-                      />
-                    ),
-                    h5: (props) => (
-                      <h5
-                        {...props}
-                        className="text-base font-semibold theme-text mb-2 mt-3 text-left"
-                      />
-                    ),
-                    h6: (props) => (
-                      <h6
-                        {...props}
-                        className="text-sm font-semibold theme-text mb-2 mt-3 text-left"
-                      />
-                    ),
-                    // Enhanced paragraphs
-                    p: (props) => (
-                      <p
-                        {...props}
-                        className="mb-4 theme-text-secondary text-left"
-                      />
-                    ),
-                    // Enhanced links
-                    a: (props) => (
-                      <a
-                        {...props}
-                        className="text-blue-600 hover:underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      />
-                    ),
-                    // Enhanced lists
-                    ul: (props) => (
-                      <ul
-                        {...props}
-                        className="list-disc list-inside mb-4 theme-text-secondary text-left"
-                      />
-                    ),
-                    ol: (props) => (
-                      <ol
-                        {...props}
-                        className="list-decimal list-inside mb-4 theme-text-secondary text-left"
-                      />
-                    ),
-                    li: (props) => <li {...props} className="mb-2 text-left" />,
-                    // Enhanced blockquotes
-                    blockquote: (props) => (
-                      <blockquote
-                        {...props}
-                        className="border-l-4 border-blue-500 pl-4 py-1 my-4 theme-text-muted italic text-left"
-                      />
-                    ),
-                    // Enhanced strong/emphasis
-                    strong: (props) => (
-                      <strong {...props} className="font-bold theme-text" />
-                    ),
-                    em: (props) => <em {...props} className="italic" />,
-                    // Images
-                    img: (props) => (
-                      <img
-                        {...props}
-                        className="max-w-full h-auto rounded-lg my-4 shadow-md"
-                      />
-                    ),
-                    // Horizontal rule
-                    hr: (props) => (
-                      <hr {...props} className="border-t theme-border my-6" />
-                    ),
-                  }}
+                  components={markdownComponents}
                 >
                   {content}
                 </Markdown>

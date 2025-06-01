@@ -37,7 +37,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [systemPreference, setSystemPreference] = useState<"light" | "dark">(
-    getSystemPreference
+    () => getSystemPreference()
   );
   const [currentTheme, setCurrentTheme] = useState<ThemeType>(() => {
     // Load saved theme from localStorage or default to "system"

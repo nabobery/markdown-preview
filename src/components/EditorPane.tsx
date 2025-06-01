@@ -11,6 +11,16 @@ import { useTheme } from "../hooks/useTheme";
 
 const CodeMirror = lazy(() => import("@uiw/react-codemirror"));
 
+// Utility function to sanitize error messages for logging
+const sanitizeErrorForLogging = (err: unknown): string => {
+  if (err instanceof Error) {
+    return err.message.replace(/[\r\n]+/g, " ").substring(0, 200);
+  }
+  return String(err)
+    .replace(/[\r\n]+/g, " ")
+    .substring(0, 200);
+};
+
 interface EditorPaneProps {
   content: string;
   onChange: (content: string) => void;
@@ -144,7 +154,10 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               );
             })
             .catch((err) => {
-              console.error("Clipboard copy error:", err);
+              console.error(
+                "Clipboard copy error:",
+                sanitizeErrorForLogging(err)
+              );
               // Try fallback
               copyWithFallback(selectedText);
             });
@@ -181,7 +194,10 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               }
             })
             .catch((err) => {
-              console.error("Clipboard paste error:", err);
+              console.error(
+                "Clipboard paste error:",
+                sanitizeErrorForLogging(err)
+              );
               showNotification(
                 "Paste failed. Click the editor to focus and try again.",
                 "error"
@@ -223,7 +239,10 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               );
             })
             .catch((err) => {
-              console.error("Clipboard cut error:", err);
+              console.error(
+                "Clipboard cut error:",
+                sanitizeErrorForLogging(err)
+              );
               copyWithFallback(selectedText);
               // Still remove the text
               view.dispatch(view.state.replaceSelection(""));
@@ -259,7 +278,7 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
       document.body.removeChild(textArea);
       showNotification(`Copied ${text.length} characters!`, "success");
     } catch (err) {
-      console.error("Fallback copy error:", err);
+      console.error("Fallback copy error:", sanitizeErrorForLogging(err));
       showNotification("Copy failed.", "error");
     }
   }, []);
