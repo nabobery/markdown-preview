@@ -1,7 +1,8 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useRef, useCallback } from "react";
 import { markdown } from "@codemirror/lang-markdown";
 import { searchKeymap, search } from "@codemirror/search";
 import { keymap, EditorView } from "@codemirror/view";
+import { selectAll } from "@codemirror/commands";
 import type { Extension } from "@codemirror/state";
 import { copyToClipboard, showNotification } from "../utils";
 import type { AppSettings } from "../types";
@@ -21,10 +22,177 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
   scrollExtension,
   settings,
 }) => {
+  const editorRef = useRef<{ view?: EditorView } | null>(null);
+
+  // Enhanced custom keybindings based on CodeMirror best practices
+  const customKeymap = keymap.of([
+    {
+      key: "Ctrl-a",
+      run: (view) => {
+        // Use CodeMirror's built-in selectAll command first
+        selectAll(view);
+
+        // Then add our notification
+        const docLength = view.state.doc.length;
+        if (docLength > 0) {
+          showNotification(`Selected all ${docLength} characters`, "success");
+        } else {
+          showNotification("Editor is empty. Nothing to select.", "info");
+        }
+        return true;
+      },
+    },
+    {
+      key: "Ctrl-c",
+      run: (view) => {
+        const selection = view.state.selection.main;
+
+        if (selection.empty) {
+          showNotification("No text selected to copy.", "info");
+          return true;
+        }
+
+        const selectedText = view.state.sliceDoc(selection.from, selection.to);
+
+        // Ensure editor has focus before clipboard operation
+        view.focus();
+
+        // Use proper clipboard API with fallbacks
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard
+            .writeText(selectedText)
+            .then(() => {
+              showNotification(
+                `Copied ${selectedText.length} characters!`,
+                "success"
+              );
+            })
+            .catch((err) => {
+              console.error("Clipboard copy error:", err);
+              // Try fallback
+              copyWithFallback(selectedText);
+            });
+        } else {
+          copyWithFallback(selectedText);
+        }
+        return true;
+      },
+    },
+    {
+      key: "Ctrl-v",
+      run: (view) => {
+        // Ensure editor has focus
+        view.focus();
+
+        // Use proper clipboard API
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard
+            .readText()
+            .then((clipboardText) => {
+              if (clipboardText) {
+                // Use CodeMirror's replaceSelection helper for proper handling
+                view.dispatch(view.state.replaceSelection(clipboardText));
+                view.focus();
+                showNotification(
+                  `Pasted ${clipboardText.length} characters!`,
+                  "success"
+                );
+              } else {
+                showNotification(
+                  "Clipboard is empty. Nothing to paste.",
+                  "info"
+                );
+              }
+            })
+            .catch((err) => {
+              console.error("Clipboard paste error:", err);
+              showNotification(
+                "Paste failed. Click the editor to focus and try again.",
+                "error"
+              );
+            });
+        } else {
+          showNotification(
+            "Paste requires HTTPS or localhost for security.",
+            "error"
+          );
+        }
+        return true;
+      },
+    },
+    {
+      key: "Ctrl-x",
+      run: (view) => {
+        const selection = view.state.selection.main;
+
+        if (selection.empty) {
+          showNotification("No text selected to cut.", "info");
+          return true;
+        }
+
+        const selectedText = view.state.sliceDoc(selection.from, selection.to);
+
+        view.focus();
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard
+            .writeText(selectedText)
+            .then(() => {
+              // Use CodeMirror's replaceSelection with empty string
+              view.dispatch(view.state.replaceSelection(""));
+              view.focus();
+              showNotification(
+                `Cut ${selectedText.length} characters!`,
+                "success"
+              );
+            })
+            .catch((err) => {
+              console.error("Clipboard cut error:", err);
+              copyWithFallback(selectedText);
+              // Still remove the text
+              view.dispatch(view.state.replaceSelection(""));
+              view.focus();
+              showNotification(
+                `Cut ${selectedText.length} characters!`,
+                "success"
+              );
+            });
+        } else {
+          copyWithFallback(selectedText);
+          view.dispatch(view.state.replaceSelection(""));
+          view.focus();
+          showNotification(`Cut ${selectedText.length} characters!`, "success");
+        }
+        return true;
+      },
+    },
+  ]);
+
+  // Fallback copy function for non-secure contexts
+  const copyWithFallback = useCallback((text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      showNotification(`Copied ${text.length} characters!`, "success");
+    } catch (err) {
+      console.error("Fallback copy error:", err);
+      showNotification("Copy failed.", "error");
+    }
+  }, []);
+
   const extensions = [
     markdown(),
     search(),
     keymap.of(searchKeymap),
+    customKeymap, // Add our custom keybindings
     ...(settings.wordWrap ? [EditorView.lineWrapping] : []),
     ...(scrollExtension ? [scrollExtension] : []),
   ];
@@ -53,12 +221,12 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               {content.length} characters
             </div>
             <div className="text-xs theme-text-secondary border-l theme-border pl-2">
-              Ctrl+F to search
+              Ctrl+A/C/V/X • Ctrl+F to search
             </div>
             <button
               onClick={handleCopyMarkdown}
               className="p-1 hover:bg-opacity-80 theme-surface rounded transition-colors"
-              title="Copy Markdown"
+              title="Copy All Markdown"
             >
               <svg
                 className="w-4 h-4 theme-text-secondary"
@@ -78,11 +246,12 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
         </div>
       </div>
 
-      {/* Enhanced CodeMirror Editor - Fixed layout with settings integration */}
+      {/* Enhanced CodeMirror Editor */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <div className="flex-1 min-h-0 overflow-hidden">
           <Suspense fallback={<div>Loading editor...</div>}>
             <CodeMirror
+              ref={editorRef}
               value={content}
               onChange={onChange}
               extensions={extensions}
@@ -99,8 +268,11 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
                 highlightActiveLine: true,
                 highlightSelectionMatches: true,
                 searchKeymap: false, // We're adding it manually above
+                rectangularSelection: true,
+                crosshairCursor: false,
+                drawSelection: true, // Ensure selection drawing is enabled
               }}
-              placeholder="Start typing your Markdown here..."
+              placeholder="Start typing your Markdown here... (Ctrl+A to select all, Ctrl+C to copy, Ctrl+V to paste, Ctrl+X to cut)"
               className="text-left h-full"
               style={{
                 fontSize: `${settings.fontSize}px`,
@@ -110,13 +282,13 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
           </Suspense>
         </div>
 
-        {/* Footer - Always visible */}
+        {/* Footer */}
         <div className="border-t theme-border theme-surface px-6 py-3 flex-shrink-0">
           <div className="flex items-center justify-between text-xs theme-text-secondary">
             <div className="flex items-center space-x-4">
               <span>Markdown Editor</span>
               <span>•</span>
-              <span>Syntax highlighting</span>
+              <span>Enhanced clipboard support</span>
               <span>•</span>
               <span>Search enabled</span>
               <span>•</span>
