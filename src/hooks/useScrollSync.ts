@@ -1,19 +1,20 @@
-import { useRef, useCallback, useEffect, useState } from "react";
-import * as events from "@uiw/codemirror-extensions-events";
+import { useRef, useCallback, useState, useEffect } from "react";
 import type { Extension } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 
+// Types for scroll sync hook
 interface ScrollSyncHook {
   editorScrollExtension: Extension;
-  previewRef: React.RefObject<HTMLDivElement>;
+  previewRef: React.RefObject<HTMLDivElement | null>;
   isSyncEnabled: boolean;
   toggleSync: () => void;
 }
 
 export const useScrollSync = (): ScrollSyncHook => {
-  const previewRef = useRef<HTMLDivElement>(null);
-  const editorScrollRef = useRef<HTMLElement | null>(null);
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previewRef = useRef<HTMLDivElement | null>(null);
+  const editorViewRef = useRef<EditorView | null>(null); // To store EditorView instance
+  const syncTimeoutRef = useRef<number | null>(null);
   const isScrollingRef = useRef<{ editor: boolean; preview: boolean }>({
     editor: false,
     preview: false,
@@ -23,134 +24,124 @@ export const useScrollSync = (): ScrollSyncHook => {
     setIsSyncEnabled((prev) => !prev);
   }, []);
 
+  const getScrollPercentage = (element: HTMLElement): number => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    if (scrollHeight <= clientHeight) return 0;
+    return scrollTop / (scrollHeight - clientHeight);
+  };
+
+  const setScrollPercentage = (element: HTMLElement, percentage: number) => {
+    const { scrollHeight, clientHeight } = element;
+    const maxScrollTop = scrollHeight - clientHeight;
+    element.scrollTo({
+      top: Math.max(0, Math.min(maxScrollTop, maxScrollTop * percentage)),
+      behavior: "auto",
+    });
+  };
+
   // Sync preview scroll to match editor scroll
-  const syncPreviewToEditor = useCallback(
-    (scrollTop: number, scrollHeight: number, clientHeight: number) => {
-      if (
-        !previewRef.current ||
-        !isSyncEnabled ||
-        isScrollingRef.current.preview
-      )
-        return;
+  const syncPreviewToEditor = useCallback(() => {
+    if (
+      !isSyncEnabled ||
+      !editorViewRef.current ||
+      !previewRef.current ||
+      isScrollingRef.current.preview
+    )
+      return;
 
-      isScrollingRef.current.editor = true;
+    isScrollingRef.current.editor = true;
+    const editorScroller = editorViewRef.current.scrollDOM.querySelector(
+      ".cm-scroller"
+    ) as HTMLElement;
+    if (!editorScroller) return;
 
-      // Calculate scroll percentage
-      const maxScroll = Math.max(0, scrollHeight - clientHeight);
-      const scrollPercentage =
-        maxScroll > 0 ? Math.min(1, Math.max(0, scrollTop / maxScroll)) : 0;
+    const percentage = getScrollPercentage(editorScroller);
+    setScrollPercentage(previewRef.current, percentage);
 
-      // Apply to preview with smooth scrolling
-      const previewMaxScroll = Math.max(
-        0,
-        previewRef.current.scrollHeight - previewRef.current.clientHeight
-      );
-      const previewScrollTop = previewMaxScroll * scrollPercentage;
-
-      previewRef.current.scrollTo({
-        top: previewScrollTop,
-        behavior: "auto", // Use auto for immediate sync
-      });
-
-      // Clear any existing timeout
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
-      }
-
-      // Reset flag after a short delay
-      syncTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current.editor = false;
-      }, 150);
-    },
-    [isSyncEnabled]
-  );
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = window.setTimeout(() => {
+      isScrollingRef.current.editor = false;
+    }, 150); // Debounce to prevent scroll fight
+  }, [isSyncEnabled]);
 
   // Sync editor scroll to match preview scroll
-  const syncEditorToPreview = useCallback(
-    (scrollTop: number, scrollHeight: number, clientHeight: number) => {
-      if (
-        !editorScrollRef.current ||
-        !isSyncEnabled ||
-        isScrollingRef.current.editor
-      )
-        return;
+  const syncEditorToPreview = useCallback(() => {
+    if (
+      !isSyncEnabled ||
+      !editorViewRef.current ||
+      !previewRef.current ||
+      isScrollingRef.current.editor
+    )
+      return;
 
-      isScrollingRef.current.preview = true;
+    isScrollingRef.current.preview = true;
+    const editorScroller = editorViewRef.current.scrollDOM.querySelector(
+      ".cm-scroller"
+    ) as HTMLElement;
+    if (!editorScroller) return;
 
-      // Calculate scroll percentage
-      const maxScroll = Math.max(0, scrollHeight - clientHeight);
-      const scrollPercentage =
-        maxScroll > 0 ? Math.min(1, Math.max(0, scrollTop / maxScroll)) : 0;
+    const percentage = getScrollPercentage(previewRef.current);
+    setScrollPercentage(editorScroller, percentage);
 
-      // Apply to editor
-      const editorMaxScroll = Math.max(
-        0,
-        editorScrollRef.current.scrollHeight -
-          editorScrollRef.current.clientHeight
-      );
-      const editorScrollTop = editorMaxScroll * scrollPercentage;
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = window.setTimeout(() => {
+      isScrollingRef.current.preview = false;
+    }, 150); // Debounce to prevent scroll fight
+  }, [isSyncEnabled]);
 
-      editorScrollRef.current.scrollTo({
-        top: editorScrollTop,
-        behavior: "auto",
-      });
-
-      // Clear any existing timeout
-      if (syncTimeoutRef.current) {
-        clearTimeout(syncTimeoutRef.current);
+  // CodeMirror scroll extension
+  const editorScrollExtension: Extension = EditorView.updateListener.of(
+    (update) => {
+      if (update.view) {
+        editorViewRef.current = update.view; // Store the EditorView instance
+        const scrollerElement =
+          update.view.scrollDOM.querySelector(".cm-scroller");
+        if (scrollerElement) {
+          // Remove any existing listener to avoid duplicates
+          scrollerElement.removeEventListener("scroll", syncPreviewToEditor);
+          if (isSyncEnabled) {
+            scrollerElement.addEventListener("scroll", syncPreviewToEditor, {
+              passive: true,
+            });
+          }
+        }
       }
-
-      // Reset flag after a short delay
-      syncTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current.preview = false;
-      }, 150);
-    },
-    [isSyncEnabled]
+    }
   );
-
-  // Create CodeMirror scroll extension
-  const editorScrollExtension = events.scroll({
-    scroll: (event) => {
-      const target = event.target as HTMLElement;
-
-      // Find the scrollable container (usually .cm-scroller)
-      const scrollContainer = target.closest(".cm-scroller") as HTMLElement;
-      if (scrollContainer) {
-        editorScrollRef.current = scrollContainer;
-        syncPreviewToEditor(
-          scrollContainer.scrollTop,
-          scrollContainer.scrollHeight,
-          scrollContainer.clientHeight
-        );
-      }
-    },
-  });
 
   // Set up preview scroll listener
   useEffect(() => {
     const previewElement = previewRef.current;
-    if (!previewElement) return;
-
-    const handlePreviewScroll = (event: Event) => {
-      const target = event.target as HTMLElement;
-      syncEditorToPreview(
-        target.scrollTop,
-        target.scrollHeight,
-        target.clientHeight
-      );
-    };
-
-    previewElement.addEventListener("scroll", handlePreviewScroll, {
-      passive: true,
-    });
-
+    if (previewElement) {
+      // Remove any existing listener
+      previewElement.removeEventListener("scroll", syncEditorToPreview);
+      if (isSyncEnabled) {
+        previewElement.addEventListener("scroll", syncEditorToPreview, {
+          passive: true,
+        });
+      }
+    }
+    // Cleanup on unmount or when isSyncEnabled changes
     return () => {
-      previewElement.removeEventListener("scroll", handlePreviewScroll);
+      if (previewElement) {
+        previewElement.removeEventListener("scroll", syncEditorToPreview);
+      }
+      const editorScroller =
+        editorViewRef.current?.scrollDOM.querySelector(".cm-scroller");
+      if (editorScroller) {
+        editorScroller.removeEventListener("scroll", syncPreviewToEditor);
+      }
+    };
+  }, [isSyncEnabled, syncEditorToPreview, syncPreviewToEditor]);
+
+  useEffect(() => {
+    // Clear timeout on unmount
+    return () => {
       if (syncTimeoutRef.current) {
         clearTimeout(syncTimeoutRef.current);
       }
     };
-  }, [syncEditorToPreview]);
+  }, []);
 
   return {
     editorScrollExtension,

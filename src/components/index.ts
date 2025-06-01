@@ -1,4 +1,5 @@
 // Component exports
 export { Layout } from "./Layout";
-export { EditorPane } from "./EditorPane";
-export { PreviewPane } from "./PreviewPane";
+export { default as EditorPane } from "./EditorPane";
+export { default as PreviewPane } from "./PreviewPane";
+export { ThemeToggle, SimpleThemeToggle } from "./ThemeToggle";

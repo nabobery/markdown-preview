@@ -1,61 +1,28 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { Layout, EditorPane, PreviewPane } from "./components";
 import { DEFAULT_MARKDOWN_CONTENT } from "./utils/constants";
-import { useScrollSync } from "./hooks";
+import { useScrollSync } from "./hooks/useScrollSync";
 import { showNotification, downloadFile } from "./utils";
 import "./App.css";
 
-function App() {
-  const [markdownContent, setMarkdownContent] = useState(
+function AppContent() {
+  const [markdownContent, setMarkdownContent] = useState<string>(
     DEFAULT_MARKDOWN_CONTENT
   );
 
-  // Initialize scroll synchronization
+  // Scroll synchronization
   const { editorScrollExtension, previewRef, isSyncEnabled, toggleSync } =
     useScrollSync();
 
-  // Memoized change handler to prevent unnecessary re-renders
-  const handleContentChange = useCallback((content: string) => {
-    setMarkdownContent(content);
+  // Memoized change handler for performance
+  const handleContentChange = useCallback((newContent: string) => {
+    setMarkdownContent(newContent);
   }, []);
 
-  // Reset editor with confirmation
-  const handleResetEditor = useCallback(() => {
-    if (markdownContent.trim() === "") {
-      showNotification("Editor is already empty", "info");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Are you sure you want to clear the editor? This action cannot be undone."
-    );
-
-    if (confirmed) {
-      setMarkdownContent("");
-      showNotification("Editor cleared successfully", "success");
-    }
-  }, [markdownContent]);
-
-  // Create new document (reset to default content)
-  const handleNewDocument = useCallback(() => {
-    if (markdownContent === DEFAULT_MARKDOWN_CONTENT) {
-      showNotification("Already showing default content", "info");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Are you sure you want to create a new document? Current content will be lost."
-    );
-
-    if (confirmed) {
-      setMarkdownContent(DEFAULT_MARKDOWN_CONTENT);
-      showNotification("New document created", "success");
-    }
-  }, [markdownContent]);
-
-  // Export markdown to file
+  // Export functionality
   const handleExportMarkdown = useCallback(() => {
-    if (markdownContent.trim() === "") {
+    if (!markdownContent.trim()) {
       showNotification("No content to export", "error");
       return;
     }
@@ -63,32 +30,76 @@ function App() {
     try {
       const timestamp = new Date()
         .toISOString()
-        .slice(0, 19)
-        .replace(/:/g, "-");
+        .replace(/[:.]/g, "-")
+        .slice(0, 19);
       const filename = `markdown-document-${timestamp}.md`;
       downloadFile(markdownContent, filename, "text/markdown");
-      showNotification("Markdown file downloaded successfully", "success");
+      showNotification("Markdown exported successfully!", "success");
     } catch (error) {
       console.error("Export failed:", error);
-      showNotification("Failed to export markdown file", "error");
+      showNotification("Failed to export markdown", "error");
+    }
+  }, [markdownContent]);
+
+  // Reset functionality
+  const handleResetEditor = useCallback(() => {
+    if (
+      markdownContent.trim() &&
+      markdownContent !== DEFAULT_MARKDOWN_CONTENT
+    ) {
+      if (confirm("This will clear all your current content. Are you sure?")) {
+        setMarkdownContent("");
+        showNotification("Editor cleared successfully", "success");
+      }
+    } else {
+      setMarkdownContent("");
+    }
+  }, [markdownContent]);
+
+  // New document functionality
+  const handleNewDocument = useCallback(() => {
+    if (
+      markdownContent.trim() &&
+      markdownContent !== DEFAULT_MARKDOWN_CONTENT
+    ) {
+      if (
+        confirm(
+          "This will replace your current content with a new document. Are you sure?"
+        )
+      ) {
+        setMarkdownContent(DEFAULT_MARKDOWN_CONTENT);
+        showNotification("New document created", "success");
+      }
+    } else {
+      setMarkdownContent(DEFAULT_MARKDOWN_CONTENT);
     }
   }, [markdownContent]);
 
   return (
-    <Layout
-      isSyncEnabled={isSyncEnabled}
-      onToggleSync={toggleSync}
-      onResetEditor={handleResetEditor}
-      onNewDocument={handleNewDocument}
-      onExportMarkdown={handleExportMarkdown}
-    >
-      <EditorPane
-        content={markdownContent}
-        onChange={handleContentChange}
-        scrollExtension={editorScrollExtension}
-      />
-      <PreviewPane content={markdownContent} scrollRef={previewRef} />
-    </Layout>
+    <div className="h-full w-full flex flex-col overflow-hidden">
+      <Layout
+        isSyncEnabled={isSyncEnabled}
+        onToggleSync={toggleSync}
+        onResetEditor={handleResetEditor}
+        onNewDocument={handleNewDocument}
+        onExportMarkdown={handleExportMarkdown}
+      >
+        <EditorPane
+          content={markdownContent}
+          onChange={handleContentChange}
+          scrollExtension={editorScrollExtension}
+        />
+        <PreviewPane content={markdownContent} scrollRef={previewRef} />
+      </Layout>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider defaultTheme="system" storageKey="markdown-editor-theme">
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

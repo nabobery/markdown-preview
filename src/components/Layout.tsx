@@ -1,4 +1,6 @@
 import React from "react";
+import { useTheme } from "../hooks/useTheme";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -17,10 +19,26 @@ export const Layout: React.FC<LayoutProps> = ({
   onNewDocument,
   onExportMarkdown,
 }) => {
+  const { resolvedTheme } = useTheme();
+
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div
+      className={`
+      h-screen flex flex-col transition-colors duration-200
+      ${resolvedTheme === "dark" ? "bg-gray-900" : "bg-gray-50"}
+    `}
+    >
       {/* Enhanced Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header
+        className={`
+        border-b shadow-sm transition-colors duration-200
+        ${
+          resolvedTheme === "dark"
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-200"
+        }
+      `}
+      >
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -40,25 +58,50 @@ export const Layout: React.FC<LayoutProps> = ({
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1
+                  className={`
+                  text-xl font-bold transition-colors duration-200
+                  ${
+                    resolvedTheme === "dark" ? "text-gray-100" : "text-gray-900"
+                  }
+                `}
+                >
                   Markdown Live Previewer
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p
+                  className={`
+                  text-sm transition-colors duration-200
+                  ${
+                    resolvedTheme === "dark" ? "text-gray-400" : "text-gray-500"
+                  }
+                `}
+                >
                   Real-time Markdown editor and preview
                 </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Sync Scroll Toggle */}
               {onToggleSync && (
                 <button
                   onClick={onToggleSync}
-                  className={`inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                    isSyncEnabled
-                      ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
-                  }`}
+                  className={`
+                    inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md 
+                    transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${
+                      isSyncEnabled
+                        ? resolvedTheme === "dark"
+                          ? "border-blue-600 text-blue-400 bg-blue-900 hover:bg-blue-800 focus:ring-blue-400"
+                          : "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100 focus:ring-blue-500"
+                        : resolvedTheme === "dark"
+                        ? "border-gray-600 text-gray-300 bg-gray-800 hover:bg-gray-700 focus:ring-gray-400"
+                        : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-gray-500"
+                    }
+                  `}
                   title={`${
                     isSyncEnabled ? "Disable" : "Enable"
                   } scroll synchronization`}
@@ -78,7 +121,16 @@ export const Layout: React.FC<LayoutProps> = ({
                   </svg>
                   Sync scroll
                   {isSyncEnabled && (
-                    <div className="ml-2 w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div
+                      className={`
+                      ml-2 w-2 h-2 rounded-full
+                      ${
+                        resolvedTheme === "dark"
+                          ? "bg-green-400"
+                          : "bg-green-500"
+                      }
+                    `}
+                    />
                   )}
                 </button>
               )}
@@ -87,7 +139,15 @@ export const Layout: React.FC<LayoutProps> = ({
               {onResetEditor && (
                 <button
                   onClick={onResetEditor}
-                  className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                  className={`
+                    inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md 
+                    transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${
+                      resolvedTheme === "dark"
+                        ? "border-red-600 text-red-400 bg-red-900 hover:bg-red-800 focus:ring-red-400"
+                        : "border-red-300 text-red-700 bg-white hover:bg-red-50 focus:ring-red-500"
+                    }
+                  `}
                   title="Clear editor content"
                 >
                   <svg
@@ -110,7 +170,15 @@ export const Layout: React.FC<LayoutProps> = ({
               {onExportMarkdown && (
                 <button
                   onClick={onExportMarkdown}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className={`
+                    inline-flex items-center px-3 py-2 border shadow-sm text-sm leading-4 font-medium rounded-md 
+                    transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${
+                      resolvedTheme === "dark"
+                        ? "border-gray-600 text-gray-300 bg-gray-800 hover:bg-gray-700 focus:ring-gray-400"
+                        : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50 focus:ring-blue-500"
+                    }
+                  `}
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -131,7 +199,15 @@ export const Layout: React.FC<LayoutProps> = ({
               {onNewDocument && (
                 <button
                   onClick={onNewDocument}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className={`
+                    inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md 
+                    text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                    ${
+                      resolvedTheme === "dark"
+                        ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-400"
+                        : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                    }
+                  `}
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -155,7 +231,12 @@ export const Layout: React.FC<LayoutProps> = ({
       </header>
 
       {/* Main Content - Enhanced responsive layout */}
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-gray-50">
+      <main
+        className={`
+        flex-1 flex flex-col lg:flex-row overflow-hidden transition-colors duration-200
+        ${resolvedTheme === "dark" ? "bg-gray-900" : "bg-gray-50"}
+      `}
+      >
         {children}
       </main>
     </div>
