@@ -1,46 +1,12 @@
 import React from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface PreviewPaneProps {
   content: string;
 }
 
 const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
-  // For now, just display the raw content. Will be replaced with proper Markdown rendering
-  const renderMarkdown = (markdown: string) => {
-    // Simple placeholder rendering - will be replaced with proper markdown parser
-    return markdown.split("\n").map((line, index) => {
-      if (line.startsWith("# ")) {
-        return (
-          <h1 key={index} className="text-2xl lg:text-3xl font-bold mb-4">
-            {line.slice(2)}
-          </h1>
-        );
-      }
-      if (line.startsWith("## ")) {
-        return (
-          <h2 key={index} className="text-xl lg:text-2xl font-semibold mb-3">
-            {line.slice(3)}
-          </h2>
-        );
-      }
-      if (line.startsWith("### ")) {
-        return (
-          <h3 key={index} className="text-lg lg:text-xl font-medium mb-2">
-            {line.slice(4)}
-          </h3>
-        );
-      }
-      if (line.trim() === "") {
-        return <br key={index} />;
-      }
-      return (
-        <p key={index} className="mb-2 text-sm lg:text-base">
-          {line}
-        </p>
-      );
-    });
-  };
-
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Preview Header */}
@@ -52,7 +18,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
       <div className="flex-1 p-4 overflow-auto bg-white min-h-0">
         <div className="prose prose-sm lg:prose max-w-none">
           {content ? (
-            renderMarkdown(content)
+            <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
           ) : (
             <p className="text-gray-500 italic">Preview will appear here...</p>
           )}
