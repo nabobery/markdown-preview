@@ -70,23 +70,23 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white min-h-0 shadow-sm">
+    <div className="flex-1 flex flex-col theme-background min-h-0 shadow-sm">
       {/* Enhanced Preview Header */}
-      <div className="bg-gray-50 border-b border-gray-200 px-6 py-3 flex-shrink-0">
+      <div className="theme-surface border-b theme-border px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-            <h2 className="text-sm font-semibold text-gray-700">Preview</h2>
-            <span className="text-xs text-gray-500">Live</span>
+            <h2 className="text-sm font-semibold theme-text">Preview</h2>
+            <span className="text-xs theme-text-secondary">Live</span>
           </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={handleCopyHTML}
-              className="p-1 hover:bg-gray-200 rounded transition-colors"
+              className="p-1 hover:bg-opacity-80 theme-surface rounded transition-colors"
               title="Copy HTML"
             >
               <svg
-                className="w-4 h-4 text-gray-500"
+                className="w-4 h-4 theme-text-secondary"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -101,11 +101,11 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
             </button>
             <button
               onClick={handlePrint}
-              className="p-1 hover:bg-gray-200 rounded transition-colors"
+              className="p-1 hover:bg-opacity-80 theme-surface rounded transition-colors"
               title="Print"
             >
               <svg
-                className="w-4 h-4 text-gray-500"
+                className="w-4 h-4 theme-text-secondary"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -124,7 +124,10 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
 
       {/* Enhanced Preview Content - Fixed layout */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div ref={scrollRef} className="flex-1 overflow-auto bg-white min-h-0">
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-auto theme-background min-h-0"
+        >
           <div className="p-6">
             <div className="max-w-none text-left">
               {content ? (
@@ -141,30 +144,30 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                     ),
                     // Enhanced tables
                     table: (props) => (
-                      <div className="overflow-x-auto my-6 rounded-lg border border-gray-200 shadow-sm">
+                      <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
                         <table
                           {...props}
-                          className="min-w-full divide-y divide-gray-200"
+                          className="min-w-full divide-y theme-border"
                         />
                       </div>
                     ),
                     th: (props) => (
                       <th
                         {...props}
-                        className="px-6 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200"
+                        className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
                       />
                     ),
                     td: (props) => (
                       <td
                         {...props}
-                        className="px-6 py-4 text-sm text-gray-700 border-b border-gray-100"
+                        className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
                       />
                     ),
-                    // Enhanced code blocks
+                    // Enhanced code blocks - These will be handled by CSS variables
                     pre: (props) => (
                       <pre
                         {...props}
-                        className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto shadow-lg border border-gray-700 my-4"
+                        className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
                       />
                     ),
                     code: (props: CodeProps) => {
@@ -183,42 +186,45 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                     h1: (props) => (
                       <h1
                         {...props}
-                        className="text-3xl font-bold text-gray-900 mb-4 mt-6 pb-2 border-b border-gray-200 text-left"
+                        className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border text-left"
                       />
                     ),
                     h2: (props) => (
                       <h2
                         {...props}
-                        className="text-2xl font-bold text-gray-900 mb-3 mt-5 text-left"
+                        className="text-2xl font-bold theme-text mb-3 mt-5 text-left"
                       />
                     ),
                     h3: (props) => (
                       <h3
                         {...props}
-                        className="text-xl font-semibold text-gray-900 mb-2 mt-4 text-left"
+                        className="text-xl font-semibold theme-text mb-2 mt-4 text-left"
                       />
                     ),
                     h4: (props) => (
                       <h4
                         {...props}
-                        className="text-lg font-semibold text-gray-900 mb-2 mt-3 text-left"
+                        className="text-lg font-semibold theme-text mb-2 mt-3 text-left"
                       />
                     ),
                     h5: (props) => (
                       <h5
                         {...props}
-                        className="text-base font-semibold text-gray-900 mb-2 mt-3 text-left"
+                        className="text-base font-semibold theme-text mb-2 mt-3 text-left"
                       />
                     ),
                     h6: (props) => (
                       <h6
                         {...props}
-                        className="text-sm font-semibold text-gray-900 mb-2 mt-3 text-left"
+                        className="text-sm font-semibold theme-text mb-2 mt-3 text-left"
                       />
                     ),
                     // Enhanced paragraphs
                     p: (props) => (
-                      <p {...props} className="mb-4 text-gray-700 text-left" />
+                      <p
+                        {...props}
+                        className="mb-4 theme-text-secondary text-left"
+                      />
                     ),
                     // Enhanced links
                     a: (props) => (
@@ -233,13 +239,13 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                     ul: (props) => (
                       <ul
                         {...props}
-                        className="list-disc list-inside mb-4 text-gray-700 text-left"
+                        className="list-disc list-inside mb-4 theme-text-secondary text-left"
                       />
                     ),
                     ol: (props) => (
                       <ol
                         {...props}
-                        className="list-decimal list-inside mb-4 text-gray-700 text-left"
+                        className="list-decimal list-inside mb-4 theme-text-secondary text-left"
                       />
                     ),
                     li: (props) => <li {...props} className="mb-2 text-left" />,
@@ -247,12 +253,12 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                     blockquote: (props) => (
                       <blockquote
                         {...props}
-                        className="border-l-4 border-blue-500 pl-4 py-1 my-4 text-gray-600 italic text-left"
+                        className="border-l-4 border-blue-500 pl-4 py-1 my-4 theme-text-muted italic text-left"
                       />
                     ),
                     // Enhanced strong/emphasis
                     strong: (props) => (
-                      <strong {...props} className="font-bold text-gray-900" />
+                      <strong {...props} className="font-bold theme-text" />
                     ),
                     em: (props) => <em {...props} className="italic" />,
                     // Images
@@ -264,10 +270,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                     ),
                     // Horizontal rule
                     hr: (props) => (
-                      <hr
-                        {...props}
-                        className="border-t border-gray-300 my-6"
-                      />
+                      <hr {...props} className="border-t theme-border my-6" />
                     ),
                   }}
                 >
@@ -275,9 +278,9 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                 </Markdown>
               ) : (
                 <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 theme-surface rounded-full flex items-center justify-center mb-4">
                     <svg
-                      className="w-8 h-8 text-gray-400"
+                      className="w-8 h-8 theme-text-muted"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -290,10 +293,10 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <h3 className="text-lg font-medium theme-text mb-2">
                     Start Writing
                   </h3>
-                  <p className="text-gray-500 max-w-sm">
+                  <p className="theme-text-secondary max-w-sm">
                     Type some Markdown in the editor to see a beautiful live
                     preview here.
                   </p>
@@ -304,8 +307,8 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
         </div>
 
         {/* Footer - Always visible */}
-        <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex-shrink-0">
-          <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="border-t theme-border theme-surface px-6 py-3 flex-shrink-0">
+          <div className="flex items-center justify-between text-xs theme-text-secondary">
             <div className="flex items-center space-x-4">
               <span>Markdown Live Previewer</span>
               <span>•</span>

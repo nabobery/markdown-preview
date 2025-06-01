@@ -7,6 +7,7 @@ interface LayoutProps {
   onResetEditor?: () => void;
   onNewDocument?: () => void;
   onExportMarkdown?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -16,11 +17,12 @@ export const Layout: React.FC<LayoutProps> = ({
   onResetEditor,
   onNewDocument,
   onExportMarkdown,
+  onOpenSettings,
 }) => {
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col theme-surface">
       {/* Enhanced Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="theme-background border-b theme-border shadow-sm">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -40,16 +42,43 @@ export const Layout: React.FC<LayoutProps> = ({
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold theme-text">
                   Markdown Live Previewer
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm theme-text-secondary">
                   Real-time Markdown editor and preview
                 </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-3">
+              {/* Settings Button */}
+              <button
+                onClick={onOpenSettings}
+                className="inline-flex items-center px-3 py-2 border theme-border shadow-sm text-sm leading-4 font-medium rounded-md theme-text-secondary theme-background hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                title="Open settings"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </button>
+
               {/* Sync Scroll Toggle */}
               {onToggleSync && (
                 <button
@@ -57,7 +86,7 @@ export const Layout: React.FC<LayoutProps> = ({
                   className={`inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                     isSyncEnabled
                       ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
-                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                      : "theme-border theme-text-secondary theme-background hover:bg-opacity-80"
                   }`}
                   title={`${
                     isSyncEnabled ? "Disable" : "Enable"
@@ -87,7 +116,7 @@ export const Layout: React.FC<LayoutProps> = ({
               {onResetEditor && (
                 <button
                   onClick={onResetEditor}
-                  className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 theme-background hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                   title="Clear editor content"
                 >
                   <svg
@@ -110,7 +139,7 @@ export const Layout: React.FC<LayoutProps> = ({
               {onExportMarkdown && (
                 <button
                   onClick={onExportMarkdown}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border theme-border shadow-sm text-sm leading-4 font-medium rounded-md theme-text-secondary theme-background hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -155,7 +184,7 @@ export const Layout: React.FC<LayoutProps> = ({
       </header>
 
       {/* Main Content - Enhanced responsive layout */}
-      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-gray-50">
+      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden theme-surface">
         {children}
       </main>
     </div>

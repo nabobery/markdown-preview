@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
-import { Layout, EditorPane, PreviewPane } from "./components";
+import { Layout, EditorPane, PreviewPane, SettingsModal } from "./components";
 import { DEFAULT_MARKDOWN_CONTENT } from "./utils/constants";
-import { useScrollSync } from "./hooks";
+import { useScrollSync, useSettings } from "./hooks";
 import { showNotification, downloadFile } from "./utils";
 import "./App.css";
 
@@ -9,6 +9,10 @@ function App() {
   const [markdownContent, setMarkdownContent] = useState(
     DEFAULT_MARKDOWN_CONTENT
   );
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Initialize settings
+  const { settings, setSettings } = useSettings();
 
   // Initialize scroll synchronization
   const { editorScrollExtension, previewRef, isSyncEnabled, toggleSync } =
@@ -74,21 +78,48 @@ function App() {
     }
   }, [markdownContent]);
 
+  // Settings handlers
+  const handleOpenSettings = useCallback(() => {
+    setIsSettingsOpen(true);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setIsSettingsOpen(false);
+  }, []);
+
+  const handleSettingsChange = useCallback(
+    (newSettings: typeof settings) => {
+      setSettings(newSettings);
+    },
+    [setSettings]
+  );
+
   return (
-    <Layout
-      isSyncEnabled={isSyncEnabled}
-      onToggleSync={toggleSync}
-      onResetEditor={handleResetEditor}
-      onNewDocument={handleNewDocument}
-      onExportMarkdown={handleExportMarkdown}
-    >
-      <EditorPane
-        content={markdownContent}
-        onChange={handleContentChange}
-        scrollExtension={editorScrollExtension}
+    <>
+      <Layout
+        isSyncEnabled={isSyncEnabled}
+        onToggleSync={toggleSync}
+        onResetEditor={handleResetEditor}
+        onNewDocument={handleNewDocument}
+        onExportMarkdown={handleExportMarkdown}
+        onOpenSettings={handleOpenSettings}
+      >
+        <EditorPane
+          content={markdownContent}
+          onChange={handleContentChange}
+          scrollExtension={editorScrollExtension}
+          settings={settings}
+        />
+        <PreviewPane content={markdownContent} scrollRef={previewRef} />
+      </Layout>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={handleCloseSettings}
+        settings={settings}
+        onSettingsChange={handleSettingsChange}
       />
-      <PreviewPane content={markdownContent} scrollRef={previewRef} />
-    </Layout>
+    </>
   );
 }
 
