@@ -1,17 +1,23 @@
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown } from "@codemirror/lang-markdown";
+import type { Extension } from "@codemirror/state";
 
 interface EditorPaneProps {
   content: string;
   onChange: (content: string) => void;
+  scrollExtension?: Extension;
 }
 
 export const EditorPane: React.FC<EditorPaneProps> = ({
   content,
   onChange,
+  scrollExtension,
 }) => {
-  const extensions = [markdown()];
+  const extensions = [
+    markdown(),
+    ...(scrollExtension ? [scrollExtension] : []),
+  ];
 
   return (
     <div className="flex-1 flex flex-col bg-white border-b border-gray-200 lg:border-b-0 lg:border-r lg:border-gray-300 min-h-0 shadow-sm">
@@ -52,13 +58,14 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
         </div>
       </div>
 
-      {/* Enhanced CodeMirror Editor */}
-      <div className="flex-1 overflow-hidden min-h-0 relative flex flex-col">
-        <div className="flex-1 p-6">
+      {/* Enhanced CodeMirror Editor - Fixed layout */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <CodeMirror
             value={content}
             onChange={onChange}
             extensions={extensions}
+            height="100%"
             basicSetup={{
               lineNumbers: true,
               foldGutter: true,
@@ -72,11 +79,11 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               highlightSelectionMatches: true,
             }}
             placeholder="Start typing your Markdown here..."
-            className="text-left"
+            className="text-left h-full"
           />
         </div>
 
-        {/* Footer */}
+        {/* Footer - Always visible */}
         <div className="border-t border-gray-200 bg-gray-50 px-6 py-3 flex-shrink-0">
           <div className="flex items-center justify-between text-xs text-gray-500">
             <div className="flex items-center space-x-4">

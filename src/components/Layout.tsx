@@ -2,9 +2,15 @@ import React from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
+  isSyncEnabled?: boolean;
+  onToggleSync?: () => void;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout: React.FC<LayoutProps> = ({
+  children,
+  isSyncEnabled,
+  onToggleSync,
+}) => {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Enhanced Header */}
@@ -38,6 +44,39 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             <div className="flex items-center space-x-3">
+              {/* Sync Scroll Toggle */}
+              {onToggleSync && (
+                <button
+                  onClick={onToggleSync}
+                  className={`inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                    isSyncEnabled
+                      ? "border-blue-300 text-blue-700 bg-blue-50 hover:bg-blue-100"
+                      : "border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                  }`}
+                  title={`${
+                    isSyncEnabled ? "Disable" : "Enable"
+                  } scroll synchronization`}
+                >
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2v0M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                    />
+                  </svg>
+                  Sync scroll
+                  {isSyncEnabled && (
+                    <div className="ml-2 w-2 h-2 bg-green-500 rounded-full"></div>
+                  )}
+                </button>
+              )}
+
               <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                 <svg
                   className="w-4 h-4 mr-2"
