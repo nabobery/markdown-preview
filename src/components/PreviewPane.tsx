@@ -4,7 +4,7 @@ interface PreviewPaneProps {
   content: string;
 }
 
-export const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
+const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
   // For now, just display the raw content. Will be replaced with proper Markdown rendering
   const renderMarkdown = (markdown: string) => {
     // Simple placeholder rendering - will be replaced with proper markdown parser
@@ -61,3 +61,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
     </div>
   );
 };
+
+// Memoize the component to prevent unnecessary re-renders
+export const MemoizedPreviewPane = React.memo(PreviewPane);
+export { MemoizedPreviewPane as PreviewPane };
