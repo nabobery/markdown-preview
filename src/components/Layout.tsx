@@ -9,13 +9,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
-        <h1 className="text-xl font-semibold text-gray-800">
+        <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
           Markdown Live Previewer
         </h1>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex overflow-hidden">{children}</main>
+      {/* Main Content - Responsive layout */}
+      <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {children}
+      </main>
     </div>
   );
 };

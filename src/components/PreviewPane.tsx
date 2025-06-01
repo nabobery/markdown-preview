@@ -11,21 +11,21 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
     return markdown.split("\n").map((line, index) => {
       if (line.startsWith("# ")) {
         return (
-          <h1 key={index} className="text-3xl font-bold mb-4">
+          <h1 key={index} className="text-2xl lg:text-3xl font-bold mb-4">
             {line.slice(2)}
           </h1>
         );
       }
       if (line.startsWith("## ")) {
         return (
-          <h2 key={index} className="text-2xl font-semibold mb-3">
+          <h2 key={index} className="text-xl lg:text-2xl font-semibold mb-3">
             {line.slice(3)}
           </h2>
         );
       }
       if (line.startsWith("### ")) {
         return (
-          <h3 key={index} className="text-xl font-medium mb-2">
+          <h3 key={index} className="text-lg lg:text-xl font-medium mb-2">
             {line.slice(4)}
           </h3>
         );
@@ -34,7 +34,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
         return <br key={index} />;
       }
       return (
-        <p key={index} className="mb-2">
+        <p key={index} className="mb-2 text-sm lg:text-base">
           {line}
         </p>
       );
@@ -42,15 +42,15 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Preview Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2">
+      <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0">
         <h2 className="text-sm font-medium text-gray-700">Preview</h2>
       </div>
 
       {/* Preview Content */}
-      <div className="flex-1 p-4 overflow-auto bg-white">
-        <div className="prose prose-sm max-w-none">
+      <div className="flex-1 p-4 overflow-auto bg-white min-h-0">
+        <div className="prose prose-sm lg:prose max-w-none">
           {content ? (
             renderMarkdown(content)
           ) : (

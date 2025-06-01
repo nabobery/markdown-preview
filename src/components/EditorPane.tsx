@@ -15,14 +15,14 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
   const extensions = [markdown()];
 
   return (
-    <div className="flex-1 flex flex-col border-r border-gray-200">
+    <div className="flex-1 flex flex-col border-b border-gray-200 lg:border-b-0 lg:border-r min-h-0">
       {/* Editor Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2">
+      <div className="bg-white border-b border-gray-200 px-4 py-2 flex-shrink-0">
         <h2 className="text-sm font-medium text-gray-700">Editor</h2>
       </div>
 
       {/* CodeMirror Editor */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         <CodeMirror
           value={content}
           onChange={onChange}
