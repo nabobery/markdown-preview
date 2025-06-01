@@ -1,6 +1,7 @@
 import React from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { copyToClipboard, showNotification } from "../utils";
 
 interface PreviewPaneProps {
   content: string;
@@ -8,6 +9,59 @@ interface PreviewPaneProps {
 }
 
 const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
+  const handleCopyHTML = async () => {
+    // Get the rendered HTML from the preview content
+    const previewElement = scrollRef?.current?.querySelector('.max-w-none');
+    if (previewElement) {
+      const htmlContent = previewElement.innerHTML;
+      const success = await copyToClipboard(htmlContent);
+      if (success) {
+        showNotification('HTML copied to clipboard!', 'success');
+      } else {
+        showNotification('Failed to copy HTML', 'error');
+      }
+    } else {
+      showNotification('No content to copy', 'error');
+    }
+  };
+
+  const handlePrint = () => {
+    // Create a new window with the preview content for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const previewElement = scrollRef?.current?.querySelector('.max-w-none');
+      if (previewElement) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Markdown Preview</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
+                h1, h2, h3, h4, h5, h6 { margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; }
+                h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 10px; }
+                h2 { font-size: 1.5em; }
+                h3 { font-size: 1.25em; }
+                p { margin-bottom: 16px; }
+                code { background-color: #f6f8fa; padding: 2px 4px; border-radius: 3px; font-size: 85%; }
+                pre { background-color: #f6f8fa; padding: 16px; border-radius: 6px; overflow: auto; }
+                blockquote { border-left: 4px solid #dfe2e5; padding-left: 16px; margin-left: 0; color: #6a737d; }
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #dfe2e5; padding: 6px 13px; }
+                th { background-color: #f6f8fa; font-weight: 600; }
+              </style>
+            </head>
+            <body>
+              ${previewElement.innerHTML}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col bg-white min-h-0 shadow-sm">
       {/* Enhanced Preview Header */}
@@ -20,6 +74,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
           </div>
           <div className="flex items-center space-x-2">
             <button
+              onClick={handleCopyHTML}
               className="p-1 hover:bg-gray-200 rounded transition-colors"
               title="Copy HTML"
             >
@@ -38,6 +93,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
               </svg>
             </button>
             <button
+              onClick={handlePrint}
               className="p-1 hover:bg-gray-200 rounded transition-colors"
               title="Print"
             >
