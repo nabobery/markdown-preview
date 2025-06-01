@@ -1,6 +1,8 @@
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown } from "@codemirror/lang-markdown";
+import { searchKeymap, search } from "@codemirror/search";
+import { keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { copyToClipboard, showNotification } from "../utils";
 
@@ -17,6 +19,8 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
 }) => {
   const extensions = [
     markdown(),
+    search(),
+    keymap.of(searchKeymap),
     ...(scrollExtension ? [scrollExtension] : []),
   ];
 
@@ -42,6 +46,9 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
           <div className="flex items-center space-x-2">
             <div className="text-xs text-gray-500">
               {content.length} characters
+            </div>
+            <div className="text-xs text-gray-500 border-l border-gray-300 pl-2">
+              Ctrl+F to search
             </div>
             <button
               onClick={handleCopyMarkdown}
@@ -106,6 +113,7 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               autocompletion: true,
               highlightActiveLine: true,
               highlightSelectionMatches: true,
+              searchKeymap: false, // We're adding it manually above
             }}
             placeholder="Start typing your Markdown here..."
             className="text-left h-full"
@@ -119,6 +127,8 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               <span>Markdown Editor</span>
               <span>•</span>
               <span>Syntax highlighting</span>
+              <span>•</span>
+              <span>Search enabled</span>
             </div>
             <div className="flex items-center space-x-2">
               <span>Active</span>
