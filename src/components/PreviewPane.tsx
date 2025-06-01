@@ -1,35 +1,42 @@
-import React from "react";
-import Markdown from "react-markdown";
+import React, { lazy } from "react";
 import remarkGfm from "remark-gfm";
 import { copyToClipboard, showNotification } from "../utils";
 
+const Markdown = lazy(() => import("react-markdown"));
+
 interface PreviewPaneProps {
   content: string;
-  scrollRef?: React.RefObject<HTMLDivElement>;
+  scrollRef?: React.RefObject<HTMLDivElement | null>;
+}
+
+interface CodeProps extends React.HTMLAttributes<HTMLElement> {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
 }
 
 const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
   const handleCopyHTML = async () => {
     // Get the rendered HTML from the preview content
-    const previewElement = scrollRef?.current?.querySelector('.max-w-none');
+    const previewElement = scrollRef?.current?.querySelector(".max-w-none");
     if (previewElement) {
       const htmlContent = previewElement.innerHTML;
       const success = await copyToClipboard(htmlContent);
       if (success) {
-        showNotification('HTML copied to clipboard!', 'success');
+        showNotification("HTML copied to clipboard!", "success");
       } else {
-        showNotification('Failed to copy HTML', 'error');
+        showNotification("Failed to copy HTML", "error");
       }
     } else {
-      showNotification('No content to copy', 'error');
+      showNotification("No content to copy", "error");
     }
   };
 
   const handlePrint = () => {
     // Create a new window with the preview content for printing
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (printWindow) {
-      const previewElement = scrollRef?.current?.querySelector('.max-w-none');
+      const previewElement = scrollRef?.current?.querySelector(".max-w-none");
       if (previewElement) {
         printWindow.document.write(`
           <!DOCTYPE html>
@@ -125,7 +132,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                   remarkPlugins={[remarkGfm]}
                   components={{
                     // Enhanced task lists
-                    input: ({ node, ...props }) => (
+                    input: (props) => (
                       <input
                         {...props}
                         className="mr-3 w-4 h-4 accent-blue-600 rounded"
@@ -133,7 +140,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                       />
                     ),
                     // Enhanced tables
-                    table: ({ node, ...props }) => (
+                    table: (props) => (
                       <div className="overflow-x-auto my-6 rounded-lg border border-gray-200 shadow-sm">
                         <table
                           {...props}
@@ -141,118 +148,126 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
                         />
                       </div>
                     ),
-                    th: ({ node, ...props }) => (
+                    th: (props) => (
                       <th
                         {...props}
                         className="px-6 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-900 uppercase tracking-wider border-b border-gray-200"
                       />
                     ),
-                    td: ({ node, ...props }) => (
+                    td: (props) => (
                       <td
                         {...props}
                         className="px-6 py-4 text-sm text-gray-700 border-b border-gray-100"
                       />
                     ),
                     // Enhanced code blocks
-                    pre: ({ node, ...props }) => (
+                    pre: (props) => (
                       <pre
                         {...props}
                         className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto shadow-lg border border-gray-700 my-4"
                       />
                     ),
-                    code: ({ node, inline, ...props }: any) =>
-                      inline ? (
-                        <code
-                          {...props}
-                          className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono"
-                        />
-                      ) : (
-                        <code {...props} />
-                      ),
+                    code: (props: CodeProps) => {
+                      const { inline, className, children } = props;
+                      if (inline) {
+                        return (
+                          <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
+                            {children}
+                          </code>
+                        );
+                      } else {
+                        return <code className={className}>{children}</code>;
+                      }
+                    },
                     // Enhanced headings with proper left alignment
-                    h1: ({ node, ...props }) => (
+                    h1: (props) => (
                       <h1
                         {...props}
                         className="text-3xl font-bold text-gray-900 mb-4 mt-6 pb-2 border-b border-gray-200 text-left"
                       />
                     ),
-                    h2: ({ node, ...props }) => (
+                    h2: (props) => (
                       <h2
                         {...props}
                         className="text-2xl font-bold text-gray-900 mb-3 mt-5 text-left"
                       />
                     ),
-                    h3: ({ node, ...props }) => (
+                    h3: (props) => (
                       <h3
                         {...props}
                         className="text-xl font-semibold text-gray-900 mb-2 mt-4 text-left"
                       />
                     ),
-                    h4: ({ node, ...props }) => (
+                    h4: (props) => (
                       <h4
                         {...props}
                         className="text-lg font-semibold text-gray-900 mb-2 mt-3 text-left"
                       />
                     ),
-                    h5: ({ node, ...props }) => (
+                    h5: (props) => (
                       <h5
                         {...props}
                         className="text-base font-semibold text-gray-900 mb-2 mt-3 text-left"
                       />
                     ),
-                    h6: ({ node, ...props }) => (
+                    h6: (props) => (
                       <h6
                         {...props}
                         className="text-sm font-semibold text-gray-900 mb-2 mt-3 text-left"
                       />
                     ),
                     // Enhanced paragraphs
-                    p: ({ node, ...props }) => (
-                      <p
+                    p: (props) => (
+                      <p {...props} className="mb-4 text-gray-700 text-left" />
+                    ),
+                    // Enhanced links
+                    a: (props) => (
+                      <a
                         {...props}
-                        className="text-gray-700 leading-relaxed mb-4 text-left"
+                        className="text-blue-600 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
                       />
                     ),
                     // Enhanced lists
-                    ul: ({ node, ...props }) => (
+                    ul: (props) => (
                       <ul
                         {...props}
-                        className="list-disc list-inside text-gray-700 mb-4 space-y-1 text-left"
+                        className="list-disc list-inside mb-4 text-gray-700 text-left"
                       />
                     ),
-                    ol: ({ node, ...props }) => (
+                    ol: (props) => (
                       <ol
                         {...props}
-                        className="list-decimal list-inside text-gray-700 mb-4 space-y-1 text-left"
+                        className="list-decimal list-inside mb-4 text-gray-700 text-left"
                       />
                     ),
-                    li: ({ node, ...props }) => (
-                      <li {...props} className="text-gray-700 text-left" />
-                    ),
+                    li: (props) => <li {...props} className="mb-2 text-left" />,
                     // Enhanced blockquotes
-                    blockquote: ({ node, ...props }) => (
+                    blockquote: (props) => (
                       <blockquote
                         {...props}
-                        className="border-l-4 border-blue-500 bg-blue-50 pl-4 py-2 my-4 text-gray-700 font-medium italic text-left"
+                        className="border-l-4 border-blue-500 pl-4 py-1 my-4 text-gray-600 italic text-left"
                       />
                     ),
-                    // Enhanced links
-                    a: ({ node, ...props }) => (
-                      <a
+                    // Enhanced strong/emphasis
+                    strong: (props) => (
+                      <strong {...props} className="font-bold text-gray-900" />
+                    ),
+                    em: (props) => <em {...props} className="italic" />,
+                    // Images
+                    img: (props) => (
+                      <img
                         {...props}
-                        className="text-blue-600 hover:underline text-left"
+                        className="max-w-full h-auto rounded-lg my-4 shadow-md"
                       />
                     ),
-                    // Enhanced strong text
-                    strong: ({ node, ...props }) => (
-                      <strong
+                    // Horizontal rule
+                    hr: (props) => (
+                      <hr
                         {...props}
-                        className="font-semibold text-gray-900"
+                        className="border-t border-gray-300 my-6"
                       />
-                    ),
-                    // Enhanced emphasis
-                    em: ({ node, ...props }) => (
-                      <em {...props} className="italic text-gray-700" />
                     ),
                   }}
                 >

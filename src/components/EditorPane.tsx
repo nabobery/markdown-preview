@@ -1,10 +1,11 @@
-import React from "react";
-import CodeMirror from "@uiw/react-codemirror";
+import React, { lazy, Suspense } from "react";
 import { markdown } from "@codemirror/lang-markdown";
 import { searchKeymap, search } from "@codemirror/search";
 import { keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { copyToClipboard, showNotification } from "../utils";
+
+const CodeMirror = lazy(() => import("@uiw/react-codemirror"));
 
 interface EditorPaneProps {
   content: string;
@@ -97,27 +98,29 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
       {/* Enhanced CodeMirror Editor - Fixed layout */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <div className="flex-1 min-h-0 overflow-hidden">
-          <CodeMirror
-            value={content}
-            onChange={onChange}
-            extensions={extensions}
-            height="100%"
-            basicSetup={{
-              lineNumbers: true,
-              foldGutter: true,
-              dropCursor: false,
-              allowMultipleSelections: false,
-              indentOnInput: true,
-              bracketMatching: true,
-              closeBrackets: true,
-              autocompletion: true,
-              highlightActiveLine: true,
-              highlightSelectionMatches: true,
-              searchKeymap: false, // We're adding it manually above
-            }}
-            placeholder="Start typing your Markdown here..."
-            className="text-left h-full"
-          />
+          <Suspense fallback={<div>Loading editor...</div>}>
+            <CodeMirror
+              value={content}
+              onChange={onChange}
+              extensions={extensions}
+              height="100%"
+              basicSetup={{
+                lineNumbers: true,
+                foldGutter: true,
+                dropCursor: false,
+                allowMultipleSelections: false,
+                indentOnInput: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: true,
+                highlightActiveLine: true,
+                highlightSelectionMatches: true,
+                searchKeymap: false, // We're adding it manually above
+              }}
+              placeholder="Start typing your Markdown here..."
+              className="text-left h-full"
+            />
+          </Suspense>
         </div>
 
         {/* Footer - Always visible */}

@@ -4,7 +4,7 @@ import type { Extension } from "@codemirror/state";
 
 interface ScrollSyncHook {
   editorScrollExtension: Extension;
-  previewRef: React.RefObject<HTMLDivElement>;
+  previewRef: React.RefObject<HTMLDivElement | null>;
   isSyncEnabled: boolean;
   toggleSync: () => void;
 }
@@ -13,7 +13,7 @@ export const useScrollSync = (): ScrollSyncHook => {
   const previewRef = useRef<HTMLDivElement>(null);
   const editorScrollRef = useRef<HTMLElement | null>(null);
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const syncTimeoutRef = useRef<number | null>(null);
   const isScrollingRef = useRef<{ editor: boolean; preview: boolean }>({
     editor: false,
     preview: false,

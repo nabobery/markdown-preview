@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Layout, EditorPane, PreviewPane } from "./components";
 import { DEFAULT_MARKDOWN_CONTENT } from "./utils/constants";
 import { useScrollSync } from "./hooks";
