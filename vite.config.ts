@@ -5,24 +5,29 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    exclude: [
+      "@codemirror/commands",
+      "@codemirror/language",
+      "@codemirror/state",
+      "@codemirror/view",
+      "@codemirror/lang-markdown",
+      "@codemirror/search",
+      "@codemirror/theme-one-dark",
+      "@lezer/highlight",
+    ],
+  },
   build: {
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // Fix for circular dependency issue - each package gets its own chunk
           if (id.includes("node_modules")) {
-            if (id.includes("react") || id.includes("react-dom")) {
-              return "react-vendor";
-            }
-            if (
-              id.includes("@uiw/react-codemirror") ||
-              id.includes("@codemirror")
-            ) {
-              return "codemirror-vendor";
-            }
-            if (id.includes("react-markdown") || id.includes("remark-gfm")) {
-              return "markdown-vendor";
-            }
-            return "vendor";
+            return id
+              .toString()
+              .split("node_modules/")[1]
+              .split("/")[0]
+              .toString();
           }
         },
       },
