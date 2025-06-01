@@ -1,4 +1,7 @@
 import React from "react";
+import CodeMirror from "@uiw/react-codemirror";
+import { markdown } from "@codemirror/lang-markdown";
+import { oneDark } from "@codemirror/theme-one-dark";
 
 interface EditorPaneProps {
   content: string;
@@ -9,6 +12,8 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
   content,
   onChange,
 }) => {
+  const extensions = [markdown()];
+
   return (
     <div className="flex-1 flex flex-col border-r border-gray-200">
       {/* Editor Header */}
@@ -16,12 +21,26 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
         <h2 className="text-sm font-medium text-gray-700">Editor</h2>
       </div>
 
-      {/* Editor Content - Placeholder for now, will be replaced with CodeMirror */}
-      <div className="flex-1 p-4">
-        <textarea
+      {/* CodeMirror Editor */}
+      <div className="flex-1 overflow-hidden">
+        <CodeMirror
           value={content}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full h-full resize-none border border-gray-300 rounded-md p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          onChange={onChange}
+          extensions={extensions}
+          theme={oneDark}
+          height="100%"
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: true,
+            dropCursor: false,
+            allowMultipleSelections: false,
+            indentOnInput: true,
+            bracketMatching: true,
+            closeBrackets: true,
+            autocompletion: true,
+            highlightActiveLine: true,
+            highlightSelectionMatches: true,
+          }}
           placeholder="Start typing your Markdown here..."
         />
       </div>
