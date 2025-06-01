@@ -28,10 +28,7 @@ const markdownComponents = {
   // Enhanced tables
   table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
     <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
-      <table
-        {...props}
-        className="min-w-full divide-y theme-border"
-      />
+      <table {...props} className="min-w-full divide-y theme-border" />
     </div>
   ),
   th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => (
@@ -47,7 +44,7 @@ const markdownComponents = {
     />
   ),
   // Enhanced code blocks
-  pre: (props: React.PreHTMLAttributes<HTMLPreElement>) => (
+  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
     <pre
       {...props}
       className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
@@ -104,10 +101,7 @@ const markdownComponents = {
   ),
   // Enhanced paragraphs
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p
-      {...props}
-      className="mb-4 theme-text-secondary text-left"
-    />
+    <p {...props} className="mb-4 theme-text-secondary text-left" />
   ),
   // Enhanced links
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
@@ -150,10 +144,7 @@ const markdownComponents = {
   ),
   // Images
   img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img
-      {...props}
-      className="max-w-full h-auto rounded-lg my-4 shadow-md"
-    />
+    <img {...props} className="max-w-full h-auto rounded-lg my-4 shadow-md" />
   ),
   // Horizontal rule
   hr: (props: React.HTMLAttributes<HTMLHRElement>) => (

@@ -26,8 +26,8 @@ export const useScrollSync = (): ScrollSyncHook => {
   // Generic scroll synchronization function
   const syncScroll = useCallback(
     (
-      sourceRef: React.RefObject<HTMLElement>,
-      targetRef: React.RefObject<HTMLElement>,
+      sourceRef: React.RefObject<HTMLElement | null>,
+      targetRef: React.RefObject<HTMLElement | null>,
       isSourceScrolling: boolean,
       setSourceScrolling: (value: boolean) => void,
       scrollTop: number,
