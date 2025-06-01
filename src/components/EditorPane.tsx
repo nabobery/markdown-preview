@@ -3,9 +3,11 @@ import { markdown } from "@codemirror/lang-markdown";
 import { searchKeymap, search } from "@codemirror/search";
 import { keymap, EditorView } from "@codemirror/view";
 import { selectAll } from "@codemirror/commands";
+import { drawSelection } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { copyToClipboard, showNotification } from "../utils";
 import type { AppSettings } from "../types";
+import { useTheme } from "../hooks/useTheme";
 
 const CodeMirror = lazy(() => import("@uiw/react-codemirror"));
 
@@ -23,6 +25,80 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
   settings,
 }) => {
   const editorRef = useRef<{ view?: EditorView } | null>(null);
+  const { themeConfig } = useTheme();
+
+  // Create custom theme extension with proper selection styling
+  const customTheme = EditorView.theme({
+    // Primary selection styling - highest specificity
+    "&.cm-editor .cm-selectionBackground": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    "&.cm-focused .cm-selectionBackground": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    // Native browser selection
+    "&.cm-editor ::selection": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    "&.cm-editor ::-moz-selection": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    // Content area selection
+    "&.cm-editor .cm-content ::selection": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    "&.cm-editor .cm-content ::-moz-selection": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    // Line selection
+    "&.cm-editor .cm-line ::selection": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    "&.cm-editor .cm-line ::-moz-selection": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+    },
+    // Cursor styling
+    "&.cm-editor .cm-cursor, &.cm-editor .cm-cursor-primary": {
+      borderLeftColor: `${themeConfig.colors.editorCursor} !important`,
+      borderLeftWidth: "2px !important",
+    },
+    // Selection layer styling for drawSelection
+    "&.cm-editor .cm-selectionLayer .cm-selectionBackground": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+    },
+    // Unfocused selection
+    "&.cm-editor:not(.cm-focused) .cm-selectionBackground": {
+      background: `${themeConfig.colors.editorSelection} !important`,
+      color: `${
+        themeConfig.type === "dark" ? "#ffffff" : "#000000"
+      } !important`,
+      opacity: "0.8",
+    },
+  });
 
   // Enhanced custom keybindings based on CodeMirror best practices
   const customKeymap = keymap.of([
@@ -193,6 +269,8 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
     search(),
     keymap.of(searchKeymap),
     customKeymap, // Add our custom keybindings
+    customTheme,
+    drawSelection(), // Enable custom selection rendering
     ...(settings.wordWrap ? [EditorView.lineWrapping] : []),
     ...(scrollExtension ? [scrollExtension] : []),
   ];
@@ -266,11 +344,11 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
                 closeBrackets: true,
                 autocompletion: true,
                 highlightActiveLine: true,
-                highlightSelectionMatches: true,
-                searchKeymap: false, // We're adding it manually above
+                highlightSelectionMatches: false,
+                searchKeymap: false,
                 rectangularSelection: true,
                 crosshairCursor: false,
-                drawSelection: true, // Ensure selection drawing is enabled
+                drawSelection: false,
               }}
               placeholder="Start typing your Markdown here... (Ctrl+A to select all, Ctrl+C to copy, Ctrl+V to paste, Ctrl+X to cut)"
               className="text-left h-full"

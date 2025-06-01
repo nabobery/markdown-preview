@@ -33,7 +33,8 @@ export const lightTheme: ThemeConfig = {
     // Editor specific - Optimal contrast
     editorBackground: "#ffffff",
     editorGutter: "#f8fafc",
-    editorSelection: "#dbeafe",
+    editorSelection: "#4285f4",
+    editorSelectionText: "#000000",
     editorCursor: "#3b82f6",
     editorActiveLine: "#f8fafc",
   },
@@ -77,7 +78,8 @@ export const darkTheme: ThemeConfig = {
     // Editor specific - High contrast for dark mode
     editorBackground: "#0a0f1c",
     editorGutter: "#1a1f2e",
-    editorSelection: "#1e3a8a",
+    editorSelection: "#ff6b35",
+    editorSelectionText: "#ffffff",
     editorCursor: "#60a5fa",
     editorActiveLine: "#1a1f2e",
   },

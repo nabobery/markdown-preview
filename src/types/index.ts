@@ -21,32 +21,33 @@ export interface ThemeConfig {
     background: string;
     surface: string;
     surfaceSecondary: string;
-    
+
     // Text colors
     text: string;
     textSecondary: string;
     textMuted: string;
-    
+
     // Border colors
     border: string;
     borderLight: string;
-    
+
     // Interactive colors
     primary: string;
     primaryHover: string;
     secondary: string;
     secondaryHover: string;
-    
+
     // Status colors
     success: string;
     warning: string;
     error: string;
     info: string;
-    
+
     // Editor specific
     editorBackground: string;
     editorGutter: string;
     editorSelection: string;
+    editorSelectionText: string;
     editorCursor: string;
     editorActiveLine: string;
   };
