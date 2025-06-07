@@ -11,7 +11,7 @@ This is a **live preview** of your Markdown content with **LaTeX Math Support**!
 - Real-time preview
 - **LaTeX Math Rendering** 🧮
 - **Mermaid Diagrams** 📊
-- Syntax highlighting
+- **Enhanced Syntax Highlighting** 🎨
 - Export functionality
 - And much more!
 
@@ -51,36 +51,101 @@ $$
 
 ## Diagram Examples
 
-### Flowchart
+### Flowchart with Emojis :rocket:
 
-\`\`\`mermaid
-graph TD
-    A[Start] --> B{Is it?}
-    B -->|Yes| C[OK]
-    C --> D[Rethink]
-    D --> B
-    B ---->|No| E[End]
-\`\`\`
-
-### Sequence Diagram
+### Sequence Diagram with Emojis :speech_balloon:
 
 \`\`\`mermaid
 sequenceDiagram
-    participant Alice
-    participant Bob
-    Alice->>Bob: Hello Bob, how are you?
-    Bob-->>Alice: Great!
-    Alice-)Bob: See you later!
+    participant Alice :woman:
+    participant Bob :man:
+    Alice->>Bob: Hello Bob! :wave: How are you?
+    Bob-->>Alice: Great! :thumbsup: Thanks for asking :smile:
+    Alice-)Bob: See you later! :wave:
+\`\`\`
+
+### Project Timeline :calendar:
+
+\`\`\`mermaid
+gantt
+    title Project Development :construction:
+    dateFormat  YYYY-MM-DD
+    section Planning :memo:
+    Research        :done, des1, 2024-01-01, 2024-01-15
+    Design          :done, des2, after des1, 15d
+    section Development :computer:
+    Backend         :active, dev1, 2024-02-01, 30d
+    Frontend        :dev2, after dev1, 25d
+    section Testing :test_tube:
+    Unit Tests      :test1, after dev2, 10d
+    Integration     :test2, after test1, 5d
+    section Deploy :rocket:
+    Production      :deploy, after test2, 3d
+\`\`\`
+
+## Code Highlighting Examples
+
+### JavaScript
+
+\`\`\`javascript
+// Enhanced syntax highlighting with line numbers
+const fibonacci = (n) => {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+};
+
+console.log('Fibonacci sequence:', fibonacci(10));
+\`\`\`
+
+### Python
+
+\`\`\`python
+# Data science example
+import numpy as np
+import pandas as pd
+
+def analyze_data(data):
+    """Analyze dataset with basic statistics"""
+    return {
+        'mean': np.mean(data),
+        'std': np.std(data),
+        'count': len(data)
+    }
+
+# Generate sample data
+sample = np.random.normal(0, 1, 1000)
+stats = analyze_data(sample)
+print(f"Statistics: {stats}")
+\`\`\`
+
+### TypeScript
+
+\`\`\`typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+class UserService {
+  private users: User[] = [];
+
+  async fetchUser(id: number): Promise<User | null> {
+    const user = this.users.find(u => u.id === id);
+    return user || null;
+  }
+
+  addUser(user: Omit<User, 'id'>): User {
+    const newUser = { ...user, id: Date.now() };
+    this.users.push(newUser);
+    return newUser;
+  }
+}
 \`\`\`
 
 ## Getting Started
 
-Start typing in the editor pane to see your content rendered here.
-
-\`\`\`javascript
-// Code blocks are supported too!
-console.log('Hello, Markdown with Math and Diagrams!');
-\`\`\`
+Start typing in the editor pane to see your content rendered here with beautiful syntax highlighting!
 
 > Blockquotes work as well
 

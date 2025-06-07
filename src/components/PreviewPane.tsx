@@ -1,9 +1,17 @@
 import React, { lazy } from "react";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import remarkEmoji from "remark-emoji";
+import remarkFrontmatter from "remark-frontmatter";
 import rehypeKatex from "rehype-katex";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import { copyToClipboard, showNotification } from "../utils";
 import { MermaidDiagram } from "./MermaidDiagram";
+import { useTheme } from "../hooks/useTheme";
 import "katex/dist/katex.min.css"; // KaTeX CSS for math rendering
 
 const Markdown = lazy(() => import("react-markdown"));
@@ -19,156 +27,195 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-// Extract markdown component definitions for better organization
-const markdownComponents = {
-  // Enhanced task lists
-  input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input
-      {...props}
-      className="mr-3 w-4 h-4 accent-blue-600 rounded"
-      disabled
-    />
-  ),
-  // Enhanced tables
-  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
-    <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
-      <table {...props} className="min-w-full divide-y theme-border" />
-    </div>
-  ),
-  th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => (
-    <th
-      {...props}
-      className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
-    />
-  ),
-  td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => (
-    <td
-      {...props}
-      className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
-    />
-  ),
-  // Enhanced code blocks
-  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre
-      {...props}
-      className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
-    />
-  ),
-  code: (props: CodeProps) => {
-    const { inline, className, children } = props;
-
-    if (inline) {
-      return (
-        <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
-          {children}
-        </code>
-      );
-    }
-
-    // Check if this is a mermaid code block
-    const match = /language-(\w+)/.exec(className || "");
-    const language = match ? match[1] : "";
-
-    if (language === "mermaid") {
-      const code = String(children).replace(/\n$/, "");
-      const id = Math.random().toString(36).substring(2, 11);
-      console.log("Mermaid Diagram", code, id);
-      return <MermaidDiagram code={code} id={id} />;
-    }
-
-    return <code className={className}>{children}</code>;
-  },
-  // Enhanced headings with proper left alignment
-  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1
-      {...props}
-      className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border text-left"
-    />
-  ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2
-      {...props}
-      className="text-2xl font-bold theme-text mb-3 mt-5 text-left"
-    />
-  ),
-  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3
-      {...props}
-      className="text-xl font-semibold theme-text mb-2 mt-4 text-left"
-    />
-  ),
-  h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h4
-      {...props}
-      className="text-lg font-semibold theme-text mb-2 mt-3 text-left"
-    />
-  ),
-  h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h5
-      {...props}
-      className="text-base font-semibold theme-text mb-2 mt-3 text-left"
-    />
-  ),
-  h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h6
-      {...props}
-      className="text-sm font-semibold theme-text mb-2 mt-3 text-left"
-    />
-  ),
-  // Enhanced paragraphs
-  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p {...props} className="mb-4 theme-text-secondary text-left" />
-  ),
-  // Enhanced links
-  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a
-      {...props}
-      className="text-blue-600 hover:underline"
-      target="_blank"
-      rel="noopener noreferrer"
-    />
-  ),
-  // Enhanced lists
-  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul
-      {...props}
-      className="list-disc list-inside mb-4 theme-text-secondary text-left"
-    />
-  ),
-  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol
-      {...props}
-      className="list-decimal list-inside mb-4 theme-text-secondary text-left"
-    />
-  ),
-  li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
-    <li {...props} className="mb-2 text-left" />
-  ),
-  // Enhanced blockquotes
-  blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
-    <blockquote
-      {...props}
-      className="border-l-4 border-blue-500 pl-4 py-1 my-4 theme-text-muted italic text-left"
-    />
-  ),
-  // Enhanced strong/emphasis
-  strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong {...props} className="font-bold theme-text" />
-  ),
-  em: (props: React.HTMLAttributes<HTMLElement>) => (
-    <em {...props} className="italic" />
-  ),
-  // Images
-  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img {...props} className="max-w-full h-auto rounded-lg my-4 shadow-md" />
-  ),
-  // Horizontal rule
-  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
-    <hr {...props} className="border-t theme-border my-6" />
-  ),
-};
-
 const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
+  const { themeConfig } = useTheme();
+
+  // Define markdown components with access to theme
+  const markdownComponents = {
+    // Enhanced code blocks with syntax highlighting
+    code: (props: CodeProps) => {
+      const { inline, className, children } = props;
+
+      if (inline) {
+        return (
+          <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
+            {children}
+          </code>
+        );
+      }
+
+      // Check if this is a mermaid code block or has a language
+      const match = /language-(\w+)/.exec(className || "");
+      const language = match ? match[1] : "";
+      const code = String(children).replace(/\n$/, "");
+
+      if (language === "mermaid") {
+        const id = Math.random().toString(36).substr(2, 9);
+        return <MermaidDiagram code={code} id={id} />;
+      }
+
+      // If we have a language, use syntax highlighting
+      if (language) {
+        return (
+          <div className="code-block-container my-4">
+            <div className="flex items-center justify-between px-4 py-2 theme-surface-secondary border theme-border rounded-t-lg">
+              <span className="text-sm font-medium theme-text-secondary">
+                {language}
+              </span>
+              <button
+                onClick={() => copyToClipboard(code)}
+                className="inline-flex items-center px-2 py-1 text-xs font-medium rounded theme-text-secondary hover:bg-opacity-80 transition-colors"
+                title="Copy code"
+              >
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+                Copy
+              </button>
+            </div>
+            <SyntaxHighlighter
+              language={language}
+              style={themeConfig.type === "dark" ? oneDark : oneLight}
+              customStyle={{
+                margin: 0,
+                borderRadius: "0 0 8px 8px",
+                border: "1px solid var(--border-color)",
+                borderTop: "none",
+              }}
+              showLineNumbers={true}
+              wrapLines={true}
+              lineNumberStyle={{
+                minWidth: "3em",
+                paddingRight: "1em",
+                textAlign: "right",
+                userSelect: "none",
+              }}
+            >
+              {code}
+            </SyntaxHighlighter>
+          </div>
+        );
+      }
+
+      // Fallback for code without language
+      return <code className={className}>{children}</code>;
+    },
+    // Keep all the other components the same...
+    h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h1
+        {...props}
+        className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border"
+      />
+    ),
+    h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h2 {...props} className="text-2xl font-semibold theme-text mb-3 mt-5" />
+    ),
+    h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h3 {...props} className="text-xl font-semibold theme-text mb-3 mt-4" />
+    ),
+    h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h4 {...props} className="text-lg font-semibold theme-text mb-2 mt-3" />
+    ),
+    h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h5 {...props} className="text-base font-semibold theme-text mb-2 mt-3" />
+    ),
+    h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h6 {...props} className="text-sm font-semibold theme-text mb-2 mt-2" />
+    ),
+    p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+      <p {...props} className="theme-text mb-4 leading-relaxed" />
+    ),
+    a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+      <a {...props} className="text-blue-600 hover:text-blue-800 underline" />
+    ),
+    blockquote: (props: React.HTMLAttributes<HTMLElement>) => (
+      <blockquote
+        {...props}
+        className="border-l-4 border-blue-500 pl-4 italic theme-text-secondary my-4"
+      />
+    ),
+    ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+      <ul
+        {...props}
+        className="list-disc list-inside theme-text mb-4 space-y-1"
+      />
+    ),
+    ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
+      <ol
+        {...props}
+        className="list-decimal list-inside theme-text mb-4 space-y-1"
+      />
+    ),
+    li: (props: React.HTMLAttributes<HTMLLIElement>) => (
+      <li {...props} className="theme-text" />
+    ),
+
+    strong: (props: React.HTMLAttributes<HTMLElement>) => (
+      <strong {...props} className="font-bold" />
+    ),
+    em: (props: React.HTMLAttributes<HTMLElement>) => (
+      <em {...props} className="italic" />
+    ),
+    img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+      <img {...props} className="max-w-full h-auto rounded-lg my-4 shadow-md" />
+    ),
+    hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
+      <hr {...props} className="border-t theme-border my-6" />
+    ),
+    // Enhanced task lists
+    input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+      <input
+        {...props}
+        className="mr-3 w-4 h-4 accent-blue-600 rounded"
+        disabled
+      />
+    ),
+    // Enhanced tables
+    table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+      <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
+        <table {...props} className="min-w-full divide-y theme-border" />
+      </div>
+    ),
+    thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+      <thead {...props} className="theme-surface-secondary" />
+    ),
+    tbody: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+      <tbody {...props} />
+    ),
+    tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
+      <tr {...props} className="border-b theme-border" />
+    ),
+    th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => (
+      <th
+        {...props}
+        className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
+      />
+    ),
+    td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => (
+      <td
+        {...props}
+        className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
+      />
+    ),
+    // Enhanced code pre blocks
+    pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
+      <pre
+        {...props}
+        className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
+      />
+    ),
+  };
+
   const handleCopyHTML = async () => {
     // Get the rendered HTML from the preview content
     const previewElement = scrollRef?.current?.querySelector(".max-w-none");
@@ -285,7 +332,12 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
             <div className="max-w-none text-left">
               {content ? (
                 <Markdown
-                  remarkPlugins={[remarkGfm, remarkMath]}
+                  remarkPlugins={[
+                    remarkGfm,
+                    remarkMath,
+                    remarkEmoji,
+                    remarkFrontmatter,
+                  ]}
                   rehypePlugins={[
                     [
                       rehypeKatex,

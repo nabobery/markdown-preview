@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import mermaid from "mermaid";
+import * as emoji from "node-emoji";
 import { useTheme } from "../hooks/useTheme";
 
 interface MermaidDiagramProps {
@@ -12,6 +13,12 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { themeConfig } = useTheme();
+
+  // Function to convert emoji shortcodes to Unicode emojis in Mermaid diagrams
+  const preprocessEmojis = useCallback((text: string): string => {
+    // Convert emoji shortcodes like :rocket: to actual emojis like 🚀
+    return emoji.emojify(text);
+  }, []);
 
   // Function to fix SVG rendering issues
   const fixSvgRendering = useCallback((svgElement: SVGSVGElement) => {
@@ -132,8 +139,11 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
         // Generate unique ID for this diagram
         const diagramRenderId = `mermaid-${id}-${Date.now()}`;
 
+        // Preprocess emoji shortcodes to Unicode emojis
+        const processedCode = preprocessEmojis(code);
+
         // Validate and render the diagram
-        const { svg } = await mermaid.render(diagramRenderId, code);
+        const { svg } = await mermaid.render(diagramRenderId, processedCode);
 
         if (containerRef.current) {
           containerRef.current.innerHTML = svg;
@@ -160,7 +170,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
     };
 
     renderDiagram();
-  }, [code, id, themeConfig.type, fixSvgRendering]);
+  }, [code, id, themeConfig.type, fixSvgRendering, preprocessEmojis]);
 
   const handleExportSVG = () => {
     const svgElement = containerRef.current?.querySelector("svg");
