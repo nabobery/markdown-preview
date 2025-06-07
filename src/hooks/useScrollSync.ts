@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from "react";
-import * as events from "@uiw/codemirror-extensions-events";
+import { EditorView } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 
 interface ScrollSyncHook {
@@ -106,9 +106,9 @@ export const useScrollSync = (): ScrollSyncHook => {
     [syncScroll]
   );
 
-  // Create CodeMirror scroll extension
-  const editorScrollExtension = events.scroll({
-    scroll: (event) => {
+  // Create CodeMirror scroll extension using the proper ViewPlugin
+  const editorScrollExtension = EditorView.domEventHandlers({
+    scroll: (event: Event) => {
       const target = event.target as HTMLElement;
 
       // Find the scrollable container (usually .cm-scroller)
@@ -121,6 +121,7 @@ export const useScrollSync = (): ScrollSyncHook => {
           scrollContainer.clientHeight
         );
       }
+      return false; // Don't prevent default
     },
   });
 
