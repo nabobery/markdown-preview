@@ -15,7 +15,11 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
 
   useEffect(() => {
     const renderDiagram = async () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !code) { // Added !code check
+        setIsLoading(false); // Stop loading if no code
+        if (containerRef.current) containerRef.current.innerHTML = ""; // Clear previous diagram
+        return;
+      }
 
       try {
         setIsLoading(true);
@@ -51,15 +55,10 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
         });
 
         // Generate unique ID for this diagram
-        const diagramId = `mermaid-${id}-${Date.now()}`;
+        const diagramRenderId = `mermaid-${id}-${Date.now()}`;
 
         // Validate and render the diagram
-        const isValid = await mermaid.parse(code);
-        if (!isValid) {
-          throw new Error("Invalid Mermaid syntax");
-        }
-
-        const { svg } = await mermaid.render(diagramId, code);
+        const { svg } = await mermaid.render(diagramRenderId, code);
 
         if (containerRef.current) {
           containerRef.current.innerHTML = svg;
@@ -166,16 +165,20 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
 
       {/* Diagram Content */}
       <div className="p-4">
-        {isLoading ? (
+        {isLoading && !error && ( // Only show loader if not in error state
           <div className="flex items-center justify-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
-        ) : (
-          <div
-            ref={containerRef}
-            className="mermaid-diagram flex justify-center items-center"
-            style={{ minHeight: "100px" }}
-          />
+        )}
+        <div
+          ref={containerRef}
+          // Only apply mermaid-diagram class if not loading and no error, or style it to be hidden
+          className={`mermaid-diagram-render-area flex justify-center items-center ${isLoading || error ? 'hidden' : ''} `}
+          style={{ minHeight: isLoading || error ? "0" : "100px" }} // Collapse if loading/error
+        />
+        {/* If there's no code, you might want to show a placeholder message */}
+        {!isLoading && !error && !code && (
+            <div className="text-center theme-text-muted p-4">No diagram code provided.</div>
         )}
       </div>
     </div>

@@ -71,7 +71,8 @@ const markdownComponents = {
 
     if (language === "mermaid") {
       const code = String(children).replace(/\n$/, "");
-      const id = Math.random().toString(36).substr(2, 9);
+      const id = Math.random().toString(36).substring(2, 11);
+      console.log("Mermaid Diagram", code, id);
       return <MermaidDiagram code={code} id={id} />;
     }
 
