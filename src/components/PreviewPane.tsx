@@ -19,6 +19,7 @@ const Markdown = lazy(() => import("react-markdown"));
 interface PreviewPaneProps {
   content: string;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  className?: string;
 }
 
 interface CodeProps extends React.HTMLAttributes<HTMLElement> {
@@ -27,7 +28,10 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
+const PreviewPane: React.FC<PreviewPaneProps> = ({
+  content,
+  scrollRef
+}) => {
   const { themeConfig } = useTheme();
 
   // Define markdown components with access to theme

@@ -9,6 +9,9 @@
     "Roboto Mono", Consolas, "Courier New", monospace;
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  /* Editor variables */
+  --editor-font-size: 14px;
 }
 
 /* Smooth theme transition */
