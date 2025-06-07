@@ -273,7 +273,17 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
               {content ? (
                 <Markdown
                   remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeKatex]}
+                  rehypePlugins={[
+                    [
+                      rehypeKatex,
+                      {
+                        // Configure KaTeX options for better error handling
+                        throwOnError: false, // Don't throw on math errors
+                        errorColor: "#cc0000", // Red color for math errors
+                        strict: false, // Allow some non-standard LaTeX
+                      },
+                    ],
+                  ]}
                   components={markdownComponents}
                 >
                   {content}
