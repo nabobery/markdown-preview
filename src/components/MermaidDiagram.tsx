@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import mermaid from "mermaid";
 import { useTheme } from "../hooks/useTheme";
 
@@ -13,11 +13,44 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { themeConfig } = useTheme();
 
+  // Function to fix SVG rendering issues
+  const fixSvgRendering = useCallback((svgElement: SVGSVGElement) => {
+    // Ensure proper responsive behavior
+    svgElement.style.maxWidth = "100%";
+    svgElement.style.height = "auto";
+    svgElement.style.width = "100%";
+
+    // Fix viewBox issues - ensure it's properly set
+    const bbox = svgElement.getBBox();
+    if (bbox.width > 0 && bbox.height > 0) {
+      // Add some padding to prevent clipping
+      const padding = 10;
+      const viewBoxX = bbox.x - padding;
+      const viewBoxY = bbox.y - padding;
+      const viewBoxWidth = bbox.width + 2 * padding;
+      const viewBoxHeight = bbox.height + 2 * padding;
+
+      svgElement.setAttribute(
+        "viewBox",
+        `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
+      );
+    }
+
+    // Ensure preserveAspectRatio is set for proper scaling
+    svgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+    // Fix overflow issues
+    svgElement.style.overflow = "visible";
+
+    // Ensure proper display
+    svgElement.style.display = "block";
+  }, []);
+
   useEffect(() => {
     const renderDiagram = async () => {
-      if (!containerRef.current || !code) { // Added !code check
-        setIsLoading(false); // Stop loading if no code
-        if (containerRef.current) containerRef.current.innerHTML = ""; // Clear previous diagram
+      if (!containerRef.current || !code) {
+        setIsLoading(false);
+        if (containerRef.current) containerRef.current.innerHTML = "";
         return;
       }
 
@@ -25,31 +58,73 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
         setIsLoading(true);
         setError(null);
 
-        // Configure Mermaid with theme-aware settings
+        // Enhanced Mermaid configuration to prevent clipping
         mermaid.initialize({
           startOnLoad: false,
           theme: themeConfig.type === "dark" ? "dark" : "default",
           securityLevel: "loose",
           fontFamily: "var(--font-sans)",
           fontSize: 14,
-          // Error handling
           logLevel: "error",
-          // Responsive settings
+          // Enhanced responsive settings
           flowchart: {
             useMaxWidth: true,
             htmlLabels: true,
+            curve: "basis",
+            padding: 20, // Add padding to prevent clipping
           },
           sequence: {
             useMaxWidth: true,
             wrap: true,
+            width: 150,
+            height: 65,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35,
           },
           gantt: {
             useMaxWidth: true,
+            leftPadding: 75,
+            gridLineStartPadding: 35,
+            fontSize: 11,
+            sectionFontSize: 24,
+            numberSectionStyles: 4,
           },
           journey: {
             useMaxWidth: true,
+            diagramMarginX: 50,
+            diagramMarginY: 10,
+            leftMargin: 150,
+            width: 150,
+            height: 50,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35,
           },
           timeline: {
+            useMaxWidth: true,
+            diagramMarginX: 50,
+            diagramMarginY: 10,
+            leftMargin: 150,
+            width: 150,
+            height: 50,
+            boxMargin: 10,
+            boxTextMargin: 5,
+            noteMargin: 10,
+            messageMargin: 35,
+          },
+          class: {
+            useMaxWidth: true,
+          },
+          state: {
+            useMaxWidth: true,
+          },
+          er: {
+            useMaxWidth: true,
+          },
+          pie: {
             useMaxWidth: true,
           },
         });
@@ -63,11 +138,15 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
         if (containerRef.current) {
           containerRef.current.innerHTML = svg;
 
-          // Add responsive styling to the SVG
-          const svgElement = containerRef.current.querySelector("svg");
+          // Apply comprehensive SVG fixes
+          const svgElement = containerRef.current.querySelector(
+            "svg"
+          ) as SVGSVGElement;
           if (svgElement) {
-            svgElement.style.maxWidth = "100%";
-            svgElement.style.height = "auto";
+            // Wait for the SVG to be fully rendered before applying fixes
+            setTimeout(() => {
+              fixSvgRendering(svgElement);
+            }, 100);
           }
         }
       } catch (err) {
@@ -81,7 +160,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
     };
 
     renderDiagram();
-  }, [code, id, themeConfig.type]);
+  }, [code, id, themeConfig.type, fixSvgRendering]);
 
   const handleExportSVG = () => {
     const svgElement = containerRef.current?.querySelector("svg");
@@ -116,7 +195,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
   }
 
   return (
-    <div className="mermaid-container theme-surface-secondary border theme-border rounded-lg my-4 overflow-hidden">
+    <div className="mermaid-container theme-surface-secondary border theme-border rounded-lg my-4">
       {/* Diagram Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b theme-border theme-surface">
         <div className="flex items-center space-x-2">
@@ -164,21 +243,30 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
       </div>
 
       {/* Diagram Content */}
-      <div className="p-4">
-        {isLoading && !error && ( // Only show loader if not in error state
+      <div className="p-4" style={{ overflow: "visible" }}>
+        {isLoading && !error && (
           <div className="flex items-center justify-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
         )}
         <div
           ref={containerRef}
-          // Only apply mermaid-diagram class if not loading and no error, or style it to be hidden
-          className={`mermaid-diagram-render-area flex justify-center items-center ${isLoading || error ? 'hidden' : ''} `}
-          style={{ minHeight: isLoading || error ? "0" : "100px" }} // Collapse if loading/error
+          className={`mermaid-diagram-render-area ${
+            isLoading || error ? "hidden" : ""
+          }`}
+          style={{
+            minHeight: isLoading || error ? "0" : "100px",
+            overflow: "visible",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-start",
+          }}
         />
-        {/* If there's no code, you might want to show a placeholder message */}
         {!isLoading && !error && !code && (
-            <div className="text-center theme-text-muted p-4">No diagram code provided.</div>
+          <div className="text-center theme-text-muted p-4">
+            No diagram code provided.
+          </div>
         )}
       </div>
     </div>

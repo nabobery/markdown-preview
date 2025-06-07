@@ -366,3 +366,138 @@ textarea:focus {
 .prose a:hover {
   color: var(--color-primary-hover) !important;
 }
+
+/* Fix for Mermaid container to prevent clipping */
+.mermaid-container {
+  overflow: visible !important;
+  width: 100%;
+  contain: none !important;
+}
+
+/* Core Mermaid SVG fixes to prevent diagram cutoffs */
+.mermaid-diagram-render-area {
+  overflow: visible !important;
+  width: 100% !important;
+  contain: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+}
+
+/* Essential SVG rendering fixes */
+.mermaid-diagram-render-area svg {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+/* Fix viewBox and scaling issues */
+.mermaid-diagram-render-area svg[viewBox] {
+  /* Allow SVG to determine its own size based on content */
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  /* Prevent any clipping from parent containers */
+  overflow: visible !important;
+}
+
+/* Ensure text in diagrams is not clipped */
+.mermaid-diagram-render-area svg text,
+.mermaid-diagram-render-area svg tspan {
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+}
+
+/* Fix for flowchart nodes and edges */
+.mermaid-diagram-render-area svg .node,
+.mermaid-diagram-render-area svg .edgePath,
+.mermaid-diagram-render-area svg .edgeLabel {
+  overflow: visible !important;
+}
+
+/* Fix for sequence diagrams */
+.mermaid-diagram-render-area svg .actor,
+.mermaid-diagram-render-area svg .activation,
+.mermaid-diagram-render-area svg .messageText {
+  overflow: visible !important;
+}
+
+/* Fix for Gantt charts */
+.mermaid-diagram-render-area svg .section,
+.mermaid-diagram-render-area svg .task,
+.mermaid-diagram-render-area svg .taskText {
+  overflow: visible !important;
+}
+
+/* Fix for state diagrams */
+.mermaid-diagram-render-area svg .state,
+.mermaid-diagram-render-area svg .stateText {
+  overflow: visible !important;
+}
+
+/* Fix for class diagrams */
+.mermaid-diagram-render-area svg .classBox,
+.mermaid-diagram-render-area svg .classText {
+  overflow: visible !important;
+}
+
+/* Responsive behavior for mobile */
+@media (max-width: 768px) {
+  .mermaid-diagram-render-area svg {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+  }
+}
+
+/* High DPI/Retina display support */
+@media (min-resolution: 2dppx) {
+  .mermaid-diagram-render-area svg {
+    image-rendering: optimizeQuality !important;
+  }
+}
+
+/* Force visibility for all Mermaid elements */
+.mermaid-diagram-render-area * {
+  overflow: visible !important;
+}
+
+/* Ensure proper scaling in different container sizes */
+.mermaid-diagram-render-area {
+  min-width: 200px;
+  min-height: 100px;
+  resize: both;
+  overflow: visible !important;
+}
+
+/* Fix for exported SVGs */
+.mermaid-diagram-render-area svg[xmlns] {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Ensure diagram content is always visible */
+.mermaid-diagram-render-area svg g {
+  overflow: visible !important;
+}
+
+/* Fix for diagrams with custom dimensions */
+.mermaid-diagram-render-area svg[width][height] {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+}
+
+/* Additional fallback for stubborn clipping issues */
+.mermaid-container .p-4 {
+  overflow: visible !important;
+  padding: 1rem !important;
+  width: 100%;
+  display: block;
+}
