@@ -3,6 +3,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { copyToClipboard, showNotification } from "../utils";
+import { MermaidDiagram } from "./MermaidDiagram";
 import "katex/dist/katex.min.css"; // KaTeX CSS for math rendering
 
 const Markdown = lazy(() => import("react-markdown"));
@@ -55,15 +56,26 @@ const markdownComponents = {
   ),
   code: (props: CodeProps) => {
     const { inline, className, children } = props;
+
     if (inline) {
       return (
         <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
           {children}
         </code>
       );
-    } else {
-      return <code className={className}>{children}</code>;
     }
+
+    // Check if this is a mermaid code block
+    const match = /language-(\w+)/.exec(className || "");
+    const language = match ? match[1] : "";
+
+    if (language === "mermaid") {
+      const code = String(children).replace(/\n$/, "");
+      const id = Math.random().toString(36).substr(2, 9);
+      return <MermaidDiagram code={code} id={id} />;
+    }
+
+    return <code className={className}>{children}</code>;
   },
   // Enhanced headings with proper left alignment
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (

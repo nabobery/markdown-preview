@@ -10,6 +10,7 @@ This is a **live preview** of your Markdown content with **LaTeX Math Support**!
 
 - Real-time preview
 - **LaTeX Math Rendering** 🧮
+- **Mermaid Diagrams** 📊
 - Syntax highlighting
 - Export functionality
 - And much more!
@@ -48,19 +49,44 @@ cx + dy
 \\end{pmatrix}
 $$
 
+## Diagram Examples
+
+### Flowchart
+
+\`\`\`mermaid
+graph TD
+    A[Start] --> B{Is it?}
+    B -->|Yes| C[OK]
+    C --> D[Rethink]
+    D --> B
+    B ---->|No| E[End]
+\`\`\`
+
+### Sequence Diagram
+
+\`\`\`mermaid
+sequenceDiagram
+    participant Alice
+    participant Bob
+    Alice->>Bob: Hello Bob, how are you?
+    Bob-->>Alice: Great!
+    Alice-)Bob: See you later!
+\`\`\`
+
 ## Getting Started
 
 Start typing in the editor pane to see your content rendered here.
 
 \`\`\`javascript
 // Code blocks are supported too!
-console.log('Hello, Markdown with Math!');
+console.log('Hello, Markdown with Math and Diagrams!');
 \`\`\`
 
 > Blockquotes work as well
 
 - [x] Task lists
 - [x] LaTeX Math Support
+- [x] Mermaid Diagrams
 - [ ] Try them out!
 `;
 
