@@ -32,7 +32,8 @@ $$\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}$$
 
 ### Matrix Example
 
-$$\\begin{pmatrix}
+$$
+\\begin{pmatrix}
 a & b \\\\
 c & d
 \\end{pmatrix}
@@ -44,7 +45,8 @@ y
 \\begin{pmatrix}
 ax + by \\\\
 cx + dy
-\\end{pmatrix}$$
+\\end{pmatrix}
+$$
 
 ## Getting Started
 
