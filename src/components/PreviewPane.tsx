@@ -1,6 +1,9 @@
 import React, { lazy } from "react";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { copyToClipboard, showNotification } from "../utils";
+import "katex/dist/katex.min.css"; // KaTeX CSS for math rendering
 
 const Markdown = lazy(() => import("react-markdown"));
 
@@ -269,7 +272,8 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
             <div className="max-w-none text-left">
               {content ? (
                 <Markdown
-                  remarkPlugins={[remarkGfm]}
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
                   components={markdownComponents}
                 >
                   {content}
