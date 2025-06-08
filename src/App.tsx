@@ -191,7 +191,11 @@ function App() {
           scrollExtension={editorScrollExtension}
           settings={settings}
         />
-        <PreviewPane content={markdownContent} scrollRef={previewRef} />
+        <PreviewPane
+          content={markdownContent}
+          scrollRef={previewRef}
+          settings={settings}
+        />
       </Layout>
 
       <SettingsModal

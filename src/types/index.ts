@@ -74,6 +74,9 @@ export interface AppSettings {
   wordWrap: boolean;
   autoSave: boolean;
   autoSaveInterval: number;
+  // Enhanced Table Features
+  tableZebraStripes: boolean;
+  tableAlignmentIndicators: boolean;
 }
 
 export interface MarkdownFile {

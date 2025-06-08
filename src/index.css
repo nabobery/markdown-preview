@@ -504,3 +504,230 @@ textarea:focus {
   width: 100%;
   display: block;
 }
+
+/* Enhanced Table Features */
+
+/* Responsive Table Container - Fix for flex layout overflow */
+.prose {
+  /* Ensure prose container doesn't overflow */
+  overflow-x: hidden;
+}
+
+/* Table responsive wrapper and constraints */
+.prose table {
+  /* Prevent tables from breaking flex layout */
+  max-width: 100%;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1rem 0;
+
+  /* Enhanced border and spacing */
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Responsive table scrolling container */
+.prose > div[role="region"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+
+  /* Smooth scrolling and accessibility */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  /* Focus management for keyboard users */
+  position: relative;
+}
+
+.prose > div[role="region"]:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Table cell content management */
+.prose th,
+.prose td {
+  /* Prevent content overflow in fixed layout */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  padding: 0.75rem 1rem;
+  border-right: 1px solid var(--color-border);
+}
+
+.prose th:last-child,
+.prose td:last-child {
+  border-right: none;
+}
+
+/* Scroll shadows for table containers */
+.prose div[role="region"]::before,
+.prose div[role="region"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.prose div[role="region"]::before {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--color-background) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+
+.prose div[role="region"]::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--color-background) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+
+.prose div[role="region"]:hover::before,
+.prose div[role="region"]:focus::before {
+  opacity: 1;
+}
+
+.prose div[role="region"]:hover::after,
+.prose div[role="region"]:focus::after {
+  opacity: 1;
+}
+
+/* Enhanced table styling */
+.prose table {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-surface);
+  transition: all 0.3s ease;
+}
+
+.prose th {
+  background-color: var(--color-surface-secondary) !important;
+  color: var(--color-text) !important;
+  font-weight: 600;
+  text-align: left;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.prose td {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: all 0.3s ease;
+}
+
+/* Zebra striping for tables */
+.table-zebra tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.025);
+  transition: background-color 0.3s ease;
+}
+
+/* Dark theme zebra striping */
+[data-theme="dark"] .table-zebra tbody tr:nth-child(even),
+.dark .table-zebra tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Enhanced table hover effects */
+.table-zebra tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease;
+}
+
+[data-theme="dark"] .table-zebra tbody tr:hover,
+.dark .table-zebra tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Table responsive scrolling enhancements */
+div[role="region"][aria-label="Table content"] {
+  position: relative;
+}
+
+div[role="region"][aria-label="Table content"]:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Alignment indicator styles */
+.table-alignment-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.25rem;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+th:hover .table-alignment-indicator {
+  opacity: 1;
+}
+
+/* Smooth scrolling for table containers */
+div[role="region"][tabindex="0"] {
+  scroll-behavior: smooth;
+}
+
+/* Mobile table enhancements */
+@media (max-width: 768px) {
+  /* Responsive table adjustments for mobile */
+  .prose table {
+    font-size: 0.875rem;
+    table-layout: auto; /* Allow more flexible layout on mobile */
+  }
+
+  .prose th,
+  .prose td {
+    padding: 0.5rem 0.75rem;
+    min-width: 100px; /* Ensure minimum readability */
+  }
+
+  /* Enhanced scroll shadows on mobile */
+  .prose div[role="region"]::before,
+  .prose div[role="region"]::after {
+    width: 15px;
+  }
+
+  /* Improved touch scrolling */
+  .prose div[role="region"] {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  /* Legacy zebra striping support */
+  .table-zebra {
+    font-size: 0.875rem;
+  }
+
+  .table-zebra th,
+  .table-zebra td {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Large screen table optimizations */
+@media (min-width: 1024px) {
+  .prose table {
+    table-layout: fixed; /* Restore fixed layout for larger screens */
+  }
+
+  .prose th,
+  .prose td {
+    padding: 1rem 1.25rem;
+  }
+}

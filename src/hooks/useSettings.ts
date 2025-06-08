@@ -11,6 +11,9 @@ const defaultSettings: AppSettings = {
   wordWrap: true,
   autoSave: true,
   autoSaveInterval: 5000,
+  // Enhanced Table Features
+  tableZebraStripes: false,
+  tableAlignmentIndicators: true,
 };
 
 export const useSettings = () => {

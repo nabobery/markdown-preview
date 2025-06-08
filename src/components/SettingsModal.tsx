@@ -61,6 +61,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       wordWrap: true,
       autoSave: true,
       autoSaveInterval: 5000,
+      // Enhanced Table Features defaults
+      tableZebraStripes: false,
+      tableAlignmentIndicators: true,
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -310,6 +313,91 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </select>
                   </div>
                 )}
+              </div>
+            </section>
+
+            {/* Table Settings Section */}
+            <section>
+              <h3 className="text-lg font-medium theme-text mb-4 flex items-center">
+                <svg
+                  className="w-5 h-5 mr-2 theme-text-secondary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 10h18M3 6h18m-9 8h9m-9 4h9m-9-8V6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2z"
+                  />
+                </svg>
+                Tables
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium theme-text-secondary">
+                      Zebra Stripes
+                    </label>
+                    <p className="text-xs theme-text-muted">
+                      Alternate row colors for easier table scanning
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      handleSettingChange(
+                        "tableZebraStripes",
+                        !localSettings.tableZebraStripes
+                      )
+                    }
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      localSettings.tableZebraStripes
+                        ? "bg-blue-600"
+                        : "theme-border bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        localSettings.tableZebraStripes
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium theme-text-secondary">
+                      Alignment Indicators
+                    </label>
+                    <p className="text-xs theme-text-muted">
+                      Show visual indicators for column text alignment
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      handleSettingChange(
+                        "tableAlignmentIndicators",
+                        !localSettings.tableAlignmentIndicators
+                      )
+                    }
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      localSettings.tableAlignmentIndicators
+                        ? "bg-blue-600"
+                        : "theme-border bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        localSettings.tableAlignmentIndicators
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
             </section>
           </div>

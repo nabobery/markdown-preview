@@ -143,6 +143,91 @@ class UserService {
 }
 \`\`\`
 
+## Enhanced Table Features 📊
+
+### Basic Table with Alignment Examples
+
+| Left Aligned | Center Aligned | Right Aligned | Default |
+|:-------------|:--------------:|--------------:|---------|
+| Apple        | Orange         | Banana        | Grape   |
+| $12.99       | $8.50          | $3.75         | $15.00  |
+| Available    | Limited        | Sold Out      | In Stock|
+
+### Performance Metrics Table
+
+| Metric | Q1 2024 | Q2 2024 | Q3 2024 | Change |
+|:-------|--------:|--------:|--------:|-------:|
+| Revenue| $125,000| $142,500| $158,300| +26.6% |
+| Users  | 1,250   | 1,890   | 2,340   | +87.2% |
+| Growth | 12.5%   | 13.8%   | 16.2%   | +3.7%  |
+
+### Technology Comparison Table
+
+| Technology |:------:| Pros |:---------------:| Cons |
+|:-----------|:------:|:-----|:---------------:|:-----|
+| React      | ⭐⭐⭐⭐⭐ | Component-based, Large ecosystem | Learning curve |
+| Vue        | ⭐⭐⭐⭐   | Easy to learn, Good docs | Smaller ecosystem |
+| Angular    | ⭐⭐⭐    | Full framework, TypeScript | Complex, Heavy |
+| Svelte     | ⭐⭐⭐⭐   | Fast, Small bundle | Newer, Limited jobs |
+
+### Data Types & Examples
+
+| Type | Example | Size | Use Case |
+|:-----|:-------:|-----:|---------:|
+| String | "Hello World" | Variable | Text data |
+| Integer | 42 | 4 bytes | Counting |
+| Float | 3.14159 | 8 bytes | Calculations |
+| Boolean | true/false | 1 bit | Logic |
+| Array | [1, 2, 3] | Variable | Collections |
+
+### Project Status Dashboard
+
+| Feature | Status | Priority | Assignee | Due Date |
+|:--------|:------:|:--------:|:--------:|---------:|
+| User Auth | ✅ Complete | High | Alice | 2024-01-15 |
+| Dashboard | 🔄 In Progress | High | Bob | 2024-01-30 |
+| Analytics | ⏳ Pending | Medium | Charlie | 2024-02-15 |
+| Mobile App | 📋 Planning | Low | Diana | 2024-03-01 |
+| API v2 | ❌ Blocked | High | Eve | TBD |
+
+### Mixed Content Table
+
+| Item | Description | Price | Rating | Available |
+|:-----|:------------|------:|:------:|:---------:|
+| 🍎 Apple | Fresh red apples from local farm | $2.99/lb | ⭐⭐⭐⭐⭐ | ✅ Yes |
+| 🥖 Bread | Artisan sourdough bread | $4.50 | ⭐⭐⭐⭐ | ✅ Yes |
+| 🧀 Cheese | Aged cheddar cheese | $8.99/lb | ⭐⭐⭐⭐⭐ | ❌ No |
+| 🥛 Milk | Organic whole milk | $3.25/gal | ⭐⭐⭐ | ⏳ Limited |
+
+### Complex Nested Table
+
+| Category | Sub-category | Details | Metrics |
+|:---------|:-------------|:--------|--------:|
+| 📱 Mobile | iOS | iPhone 15 Pro<br/>• 128GB Storage<br/>• 48MP Camera | $999 |
+|          | Android | Samsung Galaxy<br/>• 256GB Storage<br/>• 50MP Camera | $899 |
+| 💻 Laptop | MacBook | M3 Chip<br/>• 16GB RAM<br/>• 512GB SSD | $1,599 |
+|          | Windows | Dell XPS<br/>• Intel i7<br/>• 32GB RAM | $1,299 |
+
+### Large Dataset Example (Test Scrolling)
+
+| ID | Name | Email | Department | Salary | Start Date | Performance | Location |
+|---:|:-----|:------|:-----------|-------:|:----------:|:-----------:|:--------:|
+| 001 | John Smith | john.smith@company.com | Engineering | $95,000 | 2022-01-15 | Excellent | New York |
+| 002 | Jane Doe | jane.doe@company.com | Marketing | $75,000 | 2021-08-20 | Good | Los Angeles |
+| 003 | Bob Johnson | bob.johnson@company.com | Sales | $82,000 | 2023-03-10 | Outstanding | Chicago |
+| 004 | Alice Brown | alice.brown@company.com | Engineering | $98,000 | 2020-11-05 | Excellent | Seattle |
+| 005 | Charlie Davis | charlie.davis@company.com | HR | $68,000 | 2022-07-12 | Good | Austin |
+| 006 | Diana Wilson | diana.wilson@company.com | Finance | $88,000 | 2021-04-18 | Excellent | Boston |
+| 007 | Frank Miller | frank.miller@company.com | Engineering | $102,000 | 2019-09-22 | Outstanding | San Francisco |
+| 008 | Grace Lee | grace.lee@company.com | Design | $78,000 | 2023-01-30 | Good | Portland |
+
+**Table Features to Test:**
+- Toggle **Zebra Striping** in Settings to see alternating row colors
+- **Column Alignment Indicators** show arrows for left (←), center (↕), and right (→) alignment
+- **Responsive Scrolling** on mobile devices and narrow screens
+- **Theme Integration** - tables adapt to light/dark mode
+- **Accessibility** - tables include proper ARIA labels and keyboard navigation
+
 ## Getting Started
 
 Start typing in the editor pane to see your content rendered here with beautiful syntax highlighting!

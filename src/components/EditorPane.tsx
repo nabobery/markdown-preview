@@ -337,7 +337,7 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
 
   return (
     <div
-      className={`flex-1 flex flex-col theme-background border-b theme-border lg:border-b-0 lg:border-r lg:border-gray-300 min-h-0 shadow-sm ${className}`}
+      className={`flex-1 flex flex-col min-w-0 theme-background border-b theme-border lg:border-b-0 lg:border-r lg:border-gray-300 min-h-0 shadow-sm ${className}`}
     >
       {/* Enhanced Editor Header */}
       <div className="theme-surface border-b theme-border px-6 py-3 flex-shrink-0">

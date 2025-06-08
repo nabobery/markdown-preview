@@ -12,6 +12,7 @@ import {
 import { copyToClipboard, showNotification } from "../utils";
 import { MermaidDiagram } from "./MermaidDiagram";
 import { useTheme } from "../hooks/useTheme";
+import type { AppSettings } from "../types";
 import "katex/dist/katex.min.css"; // KaTeX CSS for math rendering
 
 const Markdown = lazy(() => import("react-markdown"));
@@ -20,6 +21,7 @@ interface PreviewPaneProps {
   content: string;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   className?: string;
+  settings: AppSettings;
 }
 
 interface CodeProps extends React.HTMLAttributes<HTMLElement> {
@@ -28,7 +30,11 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
+const PreviewPane: React.FC<PreviewPaneProps> = ({
+  content,
+  scrollRef,
+  settings,
+}) => {
   const { themeConfig } = useTheme();
 
   // Define markdown components with access to theme
@@ -181,10 +187,20 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
         disabled
       />
     ),
-    // Enhanced tables
+    // Enhanced tables with responsive features
     table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
-      <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
-        <table {...props} className="min-w-full divide-y theme-border" />
+      <div
+        className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm"
+        role="region"
+        aria-label="Table content"
+        tabIndex={0}
+      >
+        <table
+          {...props}
+          className={`min-w-full divide-y theme-border ${
+            settings.tableZebraStripes ? "table-zebra" : ""
+          }`}
+        />
       </div>
     ),
     thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
@@ -196,12 +212,91 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
     tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
       <tr {...props} className="border-b theme-border" />
     ),
-    th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => (
-      <th
-        {...props}
-        className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
-      />
-    ),
+    th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => {
+      // Extract text alignment from style or className
+      const getAlignment = () => {
+        const style = props.style?.textAlign;
+        const className = props.className;
+
+        if (style === "center" || className?.includes("text-center"))
+          return "center";
+        if (style === "right" || className?.includes("text-right"))
+          return "right";
+        return "left";
+      };
+
+      const alignment = getAlignment();
+
+      // Alignment indicator icons
+      const AlignmentIcon = () => {
+        if (!settings.tableAlignmentIndicators) return null;
+
+        const iconClass = "w-3 h-3 ml-1 theme-text-muted";
+
+        switch (alignment) {
+          case "center":
+            return (
+              <svg
+                className={iconClass}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                />
+              </svg>
+            );
+          case "right":
+            return (
+              <svg
+                className={iconClass}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            );
+          default:
+            return (
+              <svg
+                className={iconClass}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            );
+        }
+      };
+
+      return (
+        <th
+          {...props}
+          className={`px-6 py-3 theme-surface text-${alignment} text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border`}
+        >
+          <div className="flex items-center justify-start">
+            {props.children}
+            <AlignmentIcon />
+          </div>
+        </th>
+      );
+    },
     td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => (
       <td
         {...props}
@@ -271,7 +366,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col theme-background min-h-0 shadow-sm">
+    <div className="flex-1 flex flex-col min-w-0 theme-background min-h-0 shadow-sm">
       {/* Enhanced Preview Header */}
       <div className="theme-surface border-b theme-border px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
