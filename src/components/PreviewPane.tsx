@@ -28,10 +28,7 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-const PreviewPane: React.FC<PreviewPaneProps> = ({
-  content,
-  scrollRef
-}) => {
+const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
   const { themeConfig } = useTheme();
 
   // Define markdown components with access to theme

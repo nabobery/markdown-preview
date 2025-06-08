@@ -29,6 +29,18 @@ interface EditorPaneProps {
   className?: string;
 }
 
+// Enhanced loading component for CodeMirror
+const EditorLoadingFallback = () => (
+  <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center theme-background">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <span className="text-sm theme-text-muted">Loading editor...</span>
+      </div>
+    </div>
+  </div>
+);
+
 export const EditorPane: React.FC<EditorPaneProps> = ({
   content,
   onChange,
@@ -368,7 +380,7 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
       {/* Enhanced CodeMirror Editor */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <div className="flex-1 min-h-0 overflow-hidden">
-          <Suspense fallback={<div>Loading editor...</div>}>
+          <Suspense fallback={<EditorLoadingFallback />}>
             <CodeMirror
               ref={editorRef}
               value={content}

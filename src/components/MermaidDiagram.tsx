@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import mermaid from "mermaid";
-import * as emoji from "node-emoji";
 import { useTheme } from "../hooks/useTheme";
 
 interface MermaidDiagramProps {
@@ -8,17 +6,51 @@ interface MermaidDiagramProps {
   id: string;
 }
 
+// Lazy load mermaid only when needed
+let mermaidPromise: Promise<typeof import("mermaid")> | null = null;
+
+const loadMermaid = async () => {
+  if (!mermaidPromise) {
+    mermaidPromise = import("mermaid");
+  }
+  return mermaidPromise;
+};
+
+// Lazy load node-emoji only when needed
+let emojiPromise: Promise<typeof import("node-emoji")> | null = null;
+
+const loadEmoji = async () => {
+  if (!emojiPromise) {
+    emojiPromise = import("node-emoji");
+  }
+  return emojiPromise;
+};
+
 export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMermaidLoading, setIsMermaidLoading] = useState(true);
   const { themeConfig } = useTheme();
 
   // Function to convert emoji shortcodes to Unicode emojis in Mermaid diagrams
-  const preprocessEmojis = useCallback((text: string): string => {
-    // Convert emoji shortcodes like :rocket: to actual emojis like 🚀
-    return emoji.emojify(text);
-  }, []);
+  const preprocessEmojis = useCallback(
+    async (text: string): Promise<string> => {
+      try {
+        // Lazy load emoji library
+        const emojiModule = await loadEmoji();
+        // Convert emoji shortcodes like :rocket: to actual emojis like 🚀
+        return emojiModule.emojify(text);
+      } catch (error) {
+        console.warn(
+          "Failed to load emoji library, using original text:",
+          error
+        );
+        return text;
+      }
+    },
+    []
+  );
 
   // Function to fix SVG rendering issues
   const fixSvgRendering = useCallback((svgElement: SVGSVGElement) => {
@@ -28,19 +60,23 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
     svgElement.style.width = "100%";
 
     // Fix viewBox issues - ensure it's properly set
-    const bbox = svgElement.getBBox();
-    if (bbox.width > 0 && bbox.height > 0) {
-      // Add some padding to prevent clipping
-      const padding = 10;
-      const viewBoxX = bbox.x - padding;
-      const viewBoxY = bbox.y - padding;
-      const viewBoxWidth = bbox.width + 2 * padding;
-      const viewBoxHeight = bbox.height + 2 * padding;
+    try {
+      const bbox = svgElement.getBBox();
+      if (bbox.width > 0 && bbox.height > 0) {
+        // Add some padding to prevent clipping
+        const padding = 10;
+        const viewBoxX = bbox.x - padding;
+        const viewBoxY = bbox.y - padding;
+        const viewBoxWidth = bbox.width + 2 * padding;
+        const viewBoxHeight = bbox.height + 2 * padding;
 
-      svgElement.setAttribute(
-        "viewBox",
-        `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
-      );
+        svgElement.setAttribute(
+          "viewBox",
+          `${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}`
+        );
+      }
+    } catch (error) {
+      console.warn("Failed to get SVG bounding box:", error);
     }
 
     // Ensure preserveAspectRatio is set for proper scaling
@@ -57,13 +93,20 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
     const renderDiagram = async () => {
       if (!containerRef.current || !code) {
         setIsLoading(false);
+        setIsMermaidLoading(false);
         if (containerRef.current) containerRef.current.innerHTML = "";
         return;
       }
 
       try {
         setIsLoading(true);
+        setIsMermaidLoading(true);
         setError(null);
+
+        // Lazy load mermaid
+        const mermaidModule = await loadMermaid();
+        const mermaid = mermaidModule.default;
+        setIsMermaidLoading(false);
 
         // Enhanced Mermaid configuration to prevent clipping
         mermaid.initialize({
@@ -140,7 +183,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
         const diagramRenderId = `mermaid-${id}-${Date.now()}`;
 
         // Preprocess emoji shortcodes to Unicode emojis
-        const processedCode = preprocessEmojis(code);
+        const processedCode = await preprocessEmojis(code);
 
         // Validate and render the diagram
         const { svg } = await mermaid.render(diagramRenderId, processedCode);
@@ -166,6 +209,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
         );
       } finally {
         setIsLoading(false);
+        setIsMermaidLoading(false);
       }
     };
 
@@ -225,13 +269,16 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
           <span className="text-sm font-medium theme-text">
             Mermaid Diagram
           </span>
-          {isLoading && (
+          {isMermaidLoading && (
+            <span className="text-xs theme-text-muted">Loading library...</span>
+          )}
+          {!isMermaidLoading && isLoading && (
             <span className="text-xs theme-text-muted">Rendering...</span>
           )}
         </div>
         <button
           onClick={handleExportSVG}
-          disabled={isLoading || !!error}
+          disabled={isLoading || isMermaidLoading || !!error}
           className="inline-flex items-center px-2 py-1 text-xs font-medium rounded theme-text-secondary theme-surface-secondary hover:bg-opacity-80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border theme-border"
           title="Export as SVG"
         >
@@ -254,18 +301,25 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
 
       {/* Diagram Content */}
       <div className="p-4" style={{ overflow: "visible" }}>
-        {isLoading && !error && (
+        {(isLoading || isMermaidLoading) && !error && (
           <div className="flex items-center justify-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="text-sm theme-text-muted">
+                {isMermaidLoading
+                  ? "Loading Mermaid library..."
+                  : "Rendering diagram..."}
+              </span>
+            </div>
           </div>
         )}
         <div
           ref={containerRef}
           className={`mermaid-diagram-render-area ${
-            isLoading || error ? "hidden" : ""
+            isLoading || isMermaidLoading || error ? "hidden" : ""
           }`}
           style={{
-            minHeight: isLoading || error ? "0" : "100px",
+            minHeight: isLoading || isMermaidLoading || error ? "0" : "100px",
             overflow: "visible",
             width: "100%",
             display: "flex",
@@ -273,7 +327,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id }) => {
             alignItems: "flex-start",
           }}
         />
-        {!isLoading && !error && !code && (
+        {!isLoading && !isMermaidLoading && !error && !code && (
           <div className="text-center theme-text-muted p-4">
             No diagram code provided.
           </div>
