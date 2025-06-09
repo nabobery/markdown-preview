@@ -14,6 +14,10 @@ const defaultSettings: AppSettings = {
   // Enhanced Table Features
   tableZebraStripes: false,
   tableAlignmentIndicators: true,
+  // Table of Contents Features
+  showTableOfContents: true,
+  tocPosition: "left",
+  tocMaxLevel: 3,
 };
 
 export const useSettings = () => {

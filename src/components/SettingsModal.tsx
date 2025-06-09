@@ -64,6 +64,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       // Enhanced Table Features defaults
       tableZebraStripes: false,
       tableAlignmentIndicators: true,
+      // Table of Contents Features
+      showTableOfContents: true,
+      tocPosition: "left",
+      tocMaxLevel: 3,
     };
     setLocalSettings(defaultSettings);
     onSettingsChange(defaultSettings);
@@ -398,6 +402,108 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                   </button>
                 </div>
+              </div>
+            </section>
+
+            {/* Table of Contents Section */}
+            <section>
+              <h3 className="text-lg font-medium theme-text mb-4 flex items-center">
+                <svg
+                  className="w-5 h-5 mr-2 theme-text-secondary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                  />
+                </svg>
+                Table of Contents
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium theme-text-secondary">
+                      Show Table of Contents
+                    </label>
+                    <p className="text-xs theme-text-muted">
+                      Display a navigable table of contents sidebar
+                    </p>
+                  </div>
+                  <button
+                    onClick={() =>
+                      handleSettingChange(
+                        "showTableOfContents",
+                        !localSettings.showTableOfContents
+                      )
+                    }
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                      localSettings.showTableOfContents
+                        ? "bg-blue-600"
+                        : "theme-border bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        localSettings.showTableOfContents
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {localSettings.showTableOfContents && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium theme-text-secondary mb-2">
+                        TOC Position
+                      </label>
+                      <select
+                        value={localSettings.tocPosition}
+                        onChange={(e) =>
+                          handleSettingChange(
+                            "tocPosition",
+                            e.target.value as "left" | "right"
+                          )
+                        }
+                        className="w-full px-3 py-2 theme-background border theme-border rounded-md theme-text focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="left">Left sidebar</option>
+                        <option value="right">Right sidebar</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium theme-text-secondary mb-2">
+                        Maximum Heading Level
+                      </label>
+                      <select
+                        value={localSettings.tocMaxLevel}
+                        onChange={(e) =>
+                          handleSettingChange(
+                            "tocMaxLevel",
+                            Number(e.target.value)
+                          )
+                        }
+                        className="w-full px-3 py-2 theme-background border theme-border rounded-md theme-text focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value={1}>H1 only</option>
+                        <option value={2}>H1-H2</option>
+                        <option value={3}>H1-H3</option>
+                        <option value={4}>H1-H4</option>
+                        <option value={5}>H1-H5</option>
+                        <option value={6}>H1-H6</option>
+                      </select>
+                      <p className="text-xs theme-text-muted mt-2">
+                        Show headings up to the selected level in the TOC
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </section>
           </div>
