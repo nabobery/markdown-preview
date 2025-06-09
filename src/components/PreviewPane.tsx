@@ -4,14 +4,19 @@ import remarkMath from "remark-math";
 import remarkEmoji from "remark-emoji";
 import remarkFrontmatter from "remark-frontmatter";
 import rehypeKatex from "rehype-katex";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   oneDark,
   oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { copyToClipboard, showNotification } from "../utils";
+import { processLineBreaks } from "../utils/markdownProcessor";
 import { MermaidDiagram } from "./MermaidDiagram";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { useTheme } from "../hooks/useTheme";
+import { useActiveHeading } from "../hooks/useActiveHeading";
 import type { AppSettings } from "../types";
 import "katex/dist/katex.min.css"; // KaTeX CSS for math rendering
 
@@ -36,6 +41,9 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({
   settings,
 }) => {
   const { themeConfig } = useTheme();
+
+  // Initialize active heading detection
+  useActiveHeading();
 
   // Define markdown components with access to theme
   const markdownComponents = {
@@ -297,12 +305,16 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({
         </th>
       );
     },
-    td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => (
-      <td
-        {...props}
-        className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
-      />
-    ),
+    td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => {
+      return (
+        <td
+          {...props}
+          className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
+        >
+          {processLineBreaks(props.children as string)}
+        </td>
+      );
+    },
     // Enhanced code pre blocks
     pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
       <pre
@@ -423,32 +435,51 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({
         <div
           ref={scrollRef}
           className="flex-1 overflow-auto theme-background min-h-0"
+          data-testid="preview-content"
         >
           <div className="p-6">
             <div className="max-w-none text-left">
               {content ? (
-                <Markdown
-                  remarkPlugins={[
-                    remarkGfm,
-                    remarkMath,
-                    remarkEmoji,
-                    remarkFrontmatter,
-                  ]}
-                  rehypePlugins={[
-                    [
-                      rehypeKatex,
-                      {
-                        // Configure KaTeX options for better error handling
-                        throwOnError: false, // Don't throw on math errors
-                        errorColor: "#cc0000", // Red color for math errors
-                        strict: false, // Allow some non-standard LaTeX
-                      },
-                    ],
-                  ]}
-                  components={markdownComponents}
-                >
-                  {content}
-                </Markdown>
+                <ErrorBoundary>
+                  <Markdown
+                    remarkPlugins={[
+                      remarkGfm,
+                      remarkMath,
+                      remarkEmoji,
+                      remarkFrontmatter,
+                    ]}
+                    rehypePlugins={[
+                      rehypeSlug, // Add ID attributes to headings
+                      [
+                        rehypeAutolinkHeadings,
+                        {
+                          behavior: "prepend",
+                          properties: {
+                            className: ["heading-link"],
+                            ariaLabel: "Link to heading",
+                            title: "Link to this heading",
+                          },
+                          content: {
+                            type: "text",
+                            value: "🔗",
+                          },
+                        },
+                      ],
+                      [
+                        rehypeKatex,
+                        {
+                          // Configure KaTeX options for better error handling
+                          throwOnError: false, // Don't throw on math errors
+                          errorColor: "#cc0000", // Red color for math errors
+                          strict: false, // Allow some non-standard LaTeX
+                        },
+                      ],
+                    ]}
+                    components={markdownComponents}
+                  >
+                    {content}
+                  </Markdown>
+                </ErrorBoundary>
               ) : (
                 <div className="flex flex-col items-center justify-center h-64 text-center">
                   <div className="w-16 h-16 theme-surface rounded-full flex items-center justify-center mb-4">
