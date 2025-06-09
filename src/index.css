@@ -731,3 +731,96 @@ div[role="region"][tabindex="0"] {
     padding: 1rem 1.25rem;
   }
 }
+
+/* TOC and Heading Link Styles */
+
+/* Heading anchor links */
+.prose .heading-link {
+  opacity: 0;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  margin-left: -1.5rem;
+  padding-right: 0.5rem;
+  position: absolute;
+}
+
+/* TOC Sidebar specific styles */
+.toc-sidebar {
+  overflow-x: hidden;
+}
+
+.toc-heading-text {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.4;
+  white-space: normal;
+  max-width: 100%;
+}
+
+/* Improved animations for smooth scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Table cell improvements for line breaks */
+.prose td {
+  white-space: pre-wrap;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.prose h1:hover .heading-link,
+.prose h2:hover .heading-link,
+.prose h3:hover .heading-link,
+.prose h4:hover .heading-link,
+.prose h5:hover .heading-link,
+.prose h6:hover .heading-link {
+  opacity: 1;
+}
+
+.prose .heading-link:hover {
+  color: var(--color-primary);
+}
+
+/* Heading containers for anchor positioning */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  position: relative;
+  scroll-margin-top: 4rem; /* Account for fixed headers */
+}
+
+/* Ensure headings have proper spacing for TOC navigation */
+.prose h1:target,
+.prose h2:target,
+.prose h3:target,
+.prose h4:target,
+.prose h5:target,
+.prose h6:target {
+  scroll-margin-top: 4rem;
+}
+
+/* Mobile heading link adjustments */
+@media (max-width: 768px) {
+  .prose .heading-link {
+    position: static;
+    margin-left: 0;
+    padding-right: 0;
+    opacity: 1;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    scroll-margin-top: 2rem;
+  }
+}
