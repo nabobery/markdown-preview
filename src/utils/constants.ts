@@ -228,16 +228,64 @@ class UserService {
 - **Theme Integration** - tables adapt to light/dark mode
 - **Accessibility** - tables include proper ARIA labels and keyboard navigation
 
+## Table of Contents Navigation 📋
+
+The **Table of Contents (TOC)** feature provides seamless navigation through your document structure:
+
+### TOC Features
+
+#### Automatic Detection
+- **Smart Heading Extraction** - Automatically finds all markdown headings (H1-H6)
+- **Real-time Updates** - TOC updates as you type and modify headings
+- **Active Section Highlighting** - Shows your current position in the document
+
+#### Navigation Controls
+- **Click to Jump** - Click any TOC item to instantly scroll to that section
+- **Smooth Scrolling** - Animated transitions between sections
+- **Deep Linking** - Each heading gets a unique anchor link for sharing
+
+#### Customization Options
+- **Sidebar Position** - Choose left or right sidebar placement
+- **Heading Levels** - Control which heading levels (H1-H6) to display
+- **Show/Hide Toggle** - Enable or disable TOC in Settings
+
+### TOC Settings Guide
+
+1. **Open Settings** (⚙️ button in header)
+2. **Navigate to "Table of Contents" section**
+3. **Configure your preferences:**
+   - **Show Table of Contents**: Enable/disable the TOC sidebar
+   - **TOC Position**: Choose left or right sidebar
+   - **Maximum Heading Level**: Select H1-H6 range to display
+
+### Sample Document Structure
+
+This document demonstrates TOC functionality with multiple heading levels:
+
+#### Level 4 Heading Example
+This content appears under a level 4 heading and will show in TOC if max level is set to 4 or higher.
+
+##### Level 5 Subheading
+Even deeper nesting is supported for detailed document organization.
+
+###### Level 6 Deep Section
+The deepest heading level supported by markdown, perfect for detailed technical documentation.
+
 ## Getting Started
 
 Start typing in the editor pane to see your content rendered here with beautiful syntax highlighting!
 
-> Blockquotes work as well
+> **Tip**: Try creating multiple headings in your document and watch the TOC update automatically. Click on any TOC item to jump to that section instantly!
 
-- [x] Task lists
-- [x] LaTeX Math Support
-- [x] Mermaid Diagrams
-- [ ] Try them out!
+### Feature Checklist
+
+- [x] **Math Support** - LaTeX equations rendered with KaTeX
+- [x] **Diagram Support** - Mermaid charts with pan & zoom
+- [x] **Enhanced Tables** - Responsive tables with zebra stripes
+- [x] **Table of Contents** - Auto-generated navigation sidebar
+- [x] **Syntax Highlighting** - Beautiful code blocks with copy functionality
+- [x] **Theme System** - Light, dark, and system preference themes
+- [ ] **Try creating your own content** to test all features!
 `;
 
 export const STORAGE_KEYS = {
