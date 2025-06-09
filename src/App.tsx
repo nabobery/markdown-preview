@@ -1,11 +1,19 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { Layout, EditorPane, PreviewPane, SettingsModal } from "./components";
+import {
+  Layout,
+  EditorPane,
+  PreviewPane,
+  SettingsModal,
+  TOCSidebar,
+} from "./components";
 import { DEFAULT_MARKDOWN_CONTENT, STORAGE_KEYS } from "./utils/constants";
 import { useScrollSync, useSettings } from "./hooks";
+import { useTOCExtraction } from "./hooks/useTOCExtraction";
+import { TOCProvider } from "./contexts/TOCContext";
 import { showNotification, downloadFile, debounce } from "./utils";
 import "./App.css";
 
-function App() {
+function AppContent() {
   // Initialize settings first
   const { settings, setSettings } = useSettings();
 
@@ -175,6 +183,9 @@ function App() {
     [setSettings]
   );
 
+  // Initialize TOC extraction
+  useTOCExtraction(markdownContent);
+
   return (
     <>
       <Layout
@@ -185,17 +196,24 @@ function App() {
         onExportMarkdown={handleExportMarkdown}
         onOpenSettings={handleOpenSettings}
       >
+        {/* TOC Sidebar - Left Position */}
+        {settings.tocPosition === "left" && <TOCSidebar settings={settings} />}
+
         <EditorPane
           content={markdownContent}
           onChange={handleContentChange}
           scrollExtension={editorScrollExtension}
           settings={settings}
         />
+
         <PreviewPane
           content={markdownContent}
           scrollRef={previewRef}
           settings={settings}
         />
+
+        {/* TOC Sidebar - Right Position */}
+        {settings.tocPosition === "right" && <TOCSidebar settings={settings} />}
       </Layout>
 
       <SettingsModal
@@ -205,6 +223,14 @@ function App() {
         onSettingsChange={handleSettingsChange}
       />
     </>
+  );
+}
+
+function App() {
+  return (
+    <TOCProvider>
+      <AppContent />
+    </TOCProvider>
   );
 }
 

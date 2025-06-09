@@ -5,3 +5,5 @@ export { PreviewPane } from "./PreviewPane";
 export { ThemeToggle } from "./ThemeToggle";
 export { SettingsModal } from "./SettingsModal";
 export { MermaidDiagram } from "./MermaidDiagram";
+export { TOCSidebar } from "./TOCSidebar";
+export { ErrorBoundary } from "./ErrorBoundary";
