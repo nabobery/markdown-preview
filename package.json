@@ -17,18 +17,32 @@
     "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.37.1",
     "@tailwindcss/vite": "^4.1.8",
-    "@uiw/codemirror-extensions-events": "^4.23.12",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "@uiw/react-codemirror": "^4.23.12",
+    "github-slugger": "^2.0.0",
+    "katex": "^0.16.22",
+    "mermaid": "^11.6.0",
+    "node-emoji": "^2.2.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^15.6.1",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-katex": "^7.0.1",
+    "rehype-slug": "^6.0.0",
+    "remark-emoji": "^5.0.1",
+    "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@types/github-slugger": "^2.0.0",
+    "@types/node": "^22.15.30",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.5.1",
     "@vitejs/plugin-react-swc": "^3.9.0",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
@@ -37,5 +51,11 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.28.1",
+    "@rollup/rollup-linux-x64-musl": "^4.28.1",
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.8",
+    "lightningcss-linux-x64-gnu": "^1.30.1"
   }
 }

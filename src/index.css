@@ -9,6 +9,9 @@
     "Roboto Mono", Consolas, "Courier New", monospace;
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  /* Editor variables */
+  --editor-font-size: 14px;
 }
 
 /* Smooth theme transition */
@@ -365,4 +368,459 @@ textarea:focus {
 
 .prose a:hover {
   color: var(--color-primary-hover) !important;
+}
+
+/* Fix for Mermaid container to prevent clipping */
+.mermaid-container {
+  overflow: visible !important;
+  width: 100%;
+  contain: none !important;
+}
+
+/* Core Mermaid SVG fixes to prevent diagram cutoffs */
+.mermaid-diagram-render-area {
+  overflow: visible !important;
+  width: 100% !important;
+  contain: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+}
+
+/* Essential SVG rendering fixes */
+.mermaid-diagram-render-area svg {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+/* Fix viewBox and scaling issues */
+.mermaid-diagram-render-area svg[viewBox] {
+  /* Allow SVG to determine its own size based on content */
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  /* Prevent any clipping from parent containers */
+  overflow: visible !important;
+}
+
+/* Ensure text in diagrams is not clipped */
+.mermaid-diagram-render-area svg text,
+.mermaid-diagram-render-area svg tspan {
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+}
+
+/* Fix for flowchart nodes and edges */
+.mermaid-diagram-render-area svg .node,
+.mermaid-diagram-render-area svg .edgePath,
+.mermaid-diagram-render-area svg .edgeLabel {
+  overflow: visible !important;
+}
+
+/* Fix for sequence diagrams */
+.mermaid-diagram-render-area svg .actor,
+.mermaid-diagram-render-area svg .activation,
+.mermaid-diagram-render-area svg .messageText {
+  overflow: visible !important;
+}
+
+/* Fix for Gantt charts */
+.mermaid-diagram-render-area svg .section,
+.mermaid-diagram-render-area svg .task,
+.mermaid-diagram-render-area svg .taskText {
+  overflow: visible !important;
+}
+
+/* Fix for state diagrams */
+.mermaid-diagram-render-area svg .state,
+.mermaid-diagram-render-area svg .stateText {
+  overflow: visible !important;
+}
+
+/* Fix for class diagrams */
+.mermaid-diagram-render-area svg .classBox,
+.mermaid-diagram-render-area svg .classText {
+  overflow: visible !important;
+}
+
+/* Responsive behavior for mobile */
+@media (max-width: 768px) {
+  .mermaid-diagram-render-area svg {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+  }
+}
+
+/* High DPI/Retina display support */
+@media (min-resolution: 2dppx) {
+  .mermaid-diagram-render-area svg {
+    image-rendering: optimizeQuality !important;
+  }
+}
+
+/* Force visibility for all Mermaid elements */
+.mermaid-diagram-render-area * {
+  overflow: visible !important;
+}
+
+/* Ensure proper scaling in different container sizes */
+.mermaid-diagram-render-area {
+  min-width: 200px;
+  min-height: 100px;
+  resize: both;
+  overflow: visible !important;
+}
+
+/* Fix for exported SVGs */
+.mermaid-diagram-render-area svg[xmlns] {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Ensure diagram content is always visible */
+.mermaid-diagram-render-area svg g {
+  overflow: visible !important;
+}
+
+/* Fix for diagrams with custom dimensions */
+.mermaid-diagram-render-area svg[width][height] {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+}
+
+/* Additional fallback for stubborn clipping issues */
+.mermaid-container .p-4 {
+  overflow: visible !important;
+  padding: 1rem !important;
+  width: 100%;
+  display: block;
+}
+
+/* Enhanced Table Features */
+
+/* Responsive Table Container - Fix for flex layout overflow */
+.prose {
+  /* Ensure prose container doesn't overflow */
+  overflow-x: hidden;
+}
+
+/* Table responsive wrapper and constraints */
+.prose table {
+  /* Prevent tables from breaking flex layout */
+  max-width: 100%;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1rem 0;
+
+  /* Enhanced border and spacing */
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Responsive table scrolling container */
+.prose > div[role="region"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+
+  /* Smooth scrolling and accessibility */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  /* Focus management for keyboard users */
+  position: relative;
+}
+
+.prose > div[role="region"]:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Table cell content management */
+.prose th,
+.prose td {
+  /* Prevent content overflow in fixed layout */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  padding: 0.75rem 1rem;
+  border-right: 1px solid var(--color-border);
+}
+
+.prose th:last-child,
+.prose td:last-child {
+  border-right: none;
+}
+
+/* Scroll shadows for table containers */
+.prose div[role="region"]::before,
+.prose div[role="region"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.prose div[role="region"]::before {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--color-background) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+
+.prose div[role="region"]::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--color-background) 0%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+
+.prose div[role="region"]:hover::before,
+.prose div[role="region"]:focus::before {
+  opacity: 1;
+}
+
+.prose div[role="region"]:hover::after,
+.prose div[role="region"]:focus::after {
+  opacity: 1;
+}
+
+/* Enhanced table styling */
+.prose table {
+  border-color: var(--color-border) !important;
+  background-color: var(--color-surface);
+  transition: all 0.3s ease;
+}
+
+.prose th {
+  background-color: var(--color-surface-secondary) !important;
+  color: var(--color-text) !important;
+  font-weight: 600;
+  text-align: left;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.prose td {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition: all 0.3s ease;
+}
+
+/* Zebra striping for tables */
+.table-zebra tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.025);
+  transition: background-color 0.3s ease;
+}
+
+/* Dark theme zebra striping */
+[data-theme="dark"] .table-zebra tbody tr:nth-child(even),
+.dark .table-zebra tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Enhanced table hover effects */
+.table-zebra tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.15s ease;
+}
+
+[data-theme="dark"] .table-zebra tbody tr:hover,
+.dark .table-zebra tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Table responsive scrolling enhancements */
+div[role="region"][aria-label="Table content"] {
+  position: relative;
+}
+
+div[role="region"][aria-label="Table content"]:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Alignment indicator styles */
+.table-alignment-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.25rem;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+th:hover .table-alignment-indicator {
+  opacity: 1;
+}
+
+/* Smooth scrolling for table containers */
+div[role="region"][tabindex="0"] {
+  scroll-behavior: smooth;
+}
+
+/* Mobile table enhancements */
+@media (max-width: 768px) {
+  /* Responsive table adjustments for mobile */
+  .prose table {
+    font-size: 0.875rem;
+    table-layout: auto; /* Allow more flexible layout on mobile */
+  }
+
+  .prose th,
+  .prose td {
+    padding: 0.5rem 0.75rem;
+    min-width: 100px; /* Ensure minimum readability */
+  }
+
+  /* Enhanced scroll shadows on mobile */
+  .prose div[role="region"]::before,
+  .prose div[role="region"]::after {
+    width: 15px;
+  }
+
+  /* Improved touch scrolling */
+  .prose div[role="region"] {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  /* Legacy zebra striping support */
+  .table-zebra {
+    font-size: 0.875rem;
+  }
+
+  .table-zebra th,
+  .table-zebra td {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Large screen table optimizations */
+@media (min-width: 1024px) {
+  .prose table {
+    table-layout: fixed; /* Restore fixed layout for larger screens */
+  }
+
+  .prose th,
+  .prose td {
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* TOC and Heading Link Styles */
+
+/* Heading anchor links */
+.prose .heading-link {
+  opacity: 0;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  margin-left: -1.5rem;
+  padding-right: 0.5rem;
+  position: absolute;
+}
+
+/* TOC Sidebar specific styles */
+.toc-sidebar {
+  overflow-x: hidden;
+}
+
+.toc-heading-text {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.4;
+  white-space: normal;
+  max-width: 100%;
+}
+
+/* Improved animations for smooth scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Table cell improvements for line breaks */
+.prose td {
+  white-space: pre-wrap;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.prose h1:hover .heading-link,
+.prose h2:hover .heading-link,
+.prose h3:hover .heading-link,
+.prose h4:hover .heading-link,
+.prose h5:hover .heading-link,
+.prose h6:hover .heading-link {
+  opacity: 1;
+}
+
+.prose .heading-link:hover {
+  color: var(--color-primary);
+}
+
+/* Heading containers for anchor positioning */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  position: relative;
+  scroll-margin-top: 4rem; /* Account for fixed headers */
+}
+
+/* Ensure headings have proper spacing for TOC navigation */
+.prose h1:target,
+.prose h2:target,
+.prose h3:target,
+.prose h4:target,
+.prose h5:target,
+.prose h6:target {
+  scroll-margin-top: 4rem;
+}
+
+/* Mobile heading link adjustments */
+@media (max-width: 768px) {
+  .prose .heading-link {
+    position: static;
+    margin-left: 0;
+    padding-right: 0;
+    opacity: 1;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    scroll-margin-top: 2rem;
+  }
 }

@@ -10,7 +10,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
   let timeout: number;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
+    timeout = window.setTimeout(() => func(...args), wait);
   };
 };
 

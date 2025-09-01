@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useRef, useCallback } from "react";
+import React, { lazy, Suspense, useRef, useCallback, useEffect } from "react";
 import { markdown } from "@codemirror/lang-markdown";
 import { searchKeymap, search } from "@codemirror/search";
 import { keymap, EditorView } from "@codemirror/view";
@@ -26,19 +26,51 @@ interface EditorPaneProps {
   onChange: (content: string) => void;
   scrollExtension?: Extension;
   settings: AppSettings;
+  className?: string;
 }
+
+// Enhanced loading component for CodeMirror
+const EditorLoadingFallback = () => (
+  <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div className="flex-1 min-h-0 overflow-hidden flex items-center justify-center theme-background">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <span className="text-sm theme-text-muted">Loading editor...</span>
+      </div>
+    </div>
+  </div>
+);
 
 export const EditorPane: React.FC<EditorPaneProps> = ({
   content,
   onChange,
   scrollExtension,
   settings,
+  className = "",
 }) => {
   const editorRef = useRef<{ view?: EditorView } | null>(null);
   const { themeConfig } = useTheme();
 
-  // Create custom theme extension with proper selection styling
+  // Apply font size to CSS variables for better control
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--editor-font-size",
+      `${settings.fontSize}px`
+    );
+  }, [settings.fontSize]);
+
+  // Create custom theme extension with proper selection styling and font size
   const customTheme = EditorView.theme({
+    // Font size application
+    "&.cm-editor": {
+      fontSize: `var(--editor-font-size, ${settings.fontSize}px)`,
+    },
+    "&.cm-editor .cm-content": {
+      fontSize: `var(--editor-font-size, ${settings.fontSize}px)`,
+    },
+    "&.cm-editor .cm-line": {
+      fontSize: `var(--editor-font-size, ${settings.fontSize}px)`,
+    },
     // Primary selection styling - highest specificity
     "&.cm-editor .cm-selectionBackground": {
       background: `${themeConfig.colors.editorSelection} !important`,
@@ -304,7 +336,9 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col theme-background border-b theme-border lg:border-b-0 lg:border-r lg:border-gray-300 min-h-0 shadow-sm">
+    <div
+      className={`flex-1 flex flex-col min-w-0 theme-background border-b theme-border lg:border-b-0 lg:border-r lg:border-gray-300 min-h-0 shadow-sm ${className}`}
+    >
       {/* Enhanced Editor Header */}
       <div className="theme-surface border-b theme-border px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -346,7 +380,7 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
       {/* Enhanced CodeMirror Editor */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <div className="flex-1 min-h-0 overflow-hidden">
-          <Suspense fallback={<div>Loading editor...</div>}>
+          <Suspense fallback={<EditorLoadingFallback />}>
             <CodeMirror
               ref={editorRef}
               value={content}
@@ -372,7 +406,6 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
               placeholder="Start typing your Markdown here... (Ctrl+A to select all, Ctrl+C to copy, Ctrl+V to paste, Ctrl+X to cut)"
               className="text-left h-full"
               style={{
-                fontSize: `${settings.fontSize}px`,
                 lineHeight: "1.6",
               }}
             />
@@ -385,10 +418,6 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
             <div className="flex items-center space-x-4">
               <span>Markdown Editor</span>
               <span>•</span>
-              <span>Enhanced clipboard support</span>
-              <span>•</span>
-              <span>Search enabled</span>
-              <span>•</span>
               <span>{settings.fontSize}px</span>
               {settings.wordWrap && (
                 <>
@@ -396,9 +425,15 @@ export const EditorPane: React.FC<EditorPaneProps> = ({
                   <span>Word wrap</span>
                 </>
               )}
+              {settings.autoSave && (
+                <>
+                  <span>•</span>
+                  <span>Auto-save</span>
+                </>
+              )}
             </div>
             <div className="flex items-center space-x-2">
-              <span>Active</span>
+              <span>Ready</span>
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             </div>
           </div>

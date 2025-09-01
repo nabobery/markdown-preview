@@ -1,12 +1,32 @@
 import React, { lazy } from "react";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import remarkEmoji from "remark-emoji";
+import remarkFrontmatter from "remark-frontmatter";
+import rehypeKatex from "rehype-katex";
+import rehypeSlug from "rehype-slug";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import { copyToClipboard, showNotification } from "../utils";
+import { processLineBreaks } from "../utils/markdownProcessor";
+import { MermaidDiagram } from "./MermaidDiagram";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { useTheme } from "../hooks/useTheme";
+import { useActiveHeading } from "../hooks/useActiveHeading";
+import type { AppSettings } from "../types";
+import "katex/dist/katex.min.css"; // KaTeX CSS for math rendering
 
 const Markdown = lazy(() => import("react-markdown"));
 
 interface PreviewPaneProps {
   content: string;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  className?: string;
+  settings: AppSettings;
 }
 
 interface CodeProps extends React.HTMLAttributes<HTMLElement> {
@@ -15,144 +35,295 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-// Extract markdown component definitions for better organization
-const markdownComponents = {
-  // Enhanced task lists
-  input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input
-      {...props}
-      className="mr-3 w-4 h-4 accent-blue-600 rounded"
-      disabled
-    />
-  ),
-  // Enhanced tables
-  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
-    <div className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm">
-      <table {...props} className="min-w-full divide-y theme-border" />
-    </div>
-  ),
-  th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => (
-    <th
-      {...props}
-      className="px-6 py-3 theme-surface text-left text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border"
-    />
-  ),
-  td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => (
-    <td
-      {...props}
-      className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
-    />
-  ),
-  // Enhanced code blocks
-  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
-    <pre
-      {...props}
-      className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
-    />
-  ),
-  code: (props: CodeProps) => {
-    const { inline, className, children } = props;
-    if (inline) {
-      return (
-        <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
-          {children}
-        </code>
-      );
-    } else {
-      return <code className={className}>{children}</code>;
-    }
-  },
-  // Enhanced headings with proper left alignment
-  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h1
-      {...props}
-      className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border text-left"
-    />
-  ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h2
-      {...props}
-      className="text-2xl font-bold theme-text mb-3 mt-5 text-left"
-    />
-  ),
-  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3
-      {...props}
-      className="text-xl font-semibold theme-text mb-2 mt-4 text-left"
-    />
-  ),
-  h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h4
-      {...props}
-      className="text-lg font-semibold theme-text mb-2 mt-3 text-left"
-    />
-  ),
-  h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h5
-      {...props}
-      className="text-base font-semibold theme-text mb-2 mt-3 text-left"
-    />
-  ),
-  h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h6
-      {...props}
-      className="text-sm font-semibold theme-text mb-2 mt-3 text-left"
-    />
-  ),
-  // Enhanced paragraphs
-  p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-    <p {...props} className="mb-4 theme-text-secondary text-left" />
-  ),
-  // Enhanced links
-  a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a
-      {...props}
-      className="text-blue-600 hover:underline"
-      target="_blank"
-      rel="noopener noreferrer"
-    />
-  ),
-  // Enhanced lists
-  ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul
-      {...props}
-      className="list-disc list-inside mb-4 theme-text-secondary text-left"
-    />
-  ),
-  ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol
-      {...props}
-      className="list-decimal list-inside mb-4 theme-text-secondary text-left"
-    />
-  ),
-  li: (props: React.LiHTMLAttributes<HTMLLIElement>) => (
-    <li {...props} className="mb-2 text-left" />
-  ),
-  // Enhanced blockquotes
-  blockquote: (props: React.BlockquoteHTMLAttributes<HTMLQuoteElement>) => (
-    <blockquote
-      {...props}
-      className="border-l-4 border-blue-500 pl-4 py-1 my-4 theme-text-muted italic text-left"
-    />
-  ),
-  // Enhanced strong/emphasis
-  strong: (props: React.HTMLAttributes<HTMLElement>) => (
-    <strong {...props} className="font-bold theme-text" />
-  ),
-  em: (props: React.HTMLAttributes<HTMLElement>) => (
-    <em {...props} className="italic" />
-  ),
-  // Images
-  img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <img {...props} className="max-w-full h-auto rounded-lg my-4 shadow-md" />
-  ),
-  // Horizontal rule
-  hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
-    <hr {...props} className="border-t theme-border my-6" />
-  ),
-};
+const PreviewPane: React.FC<PreviewPaneProps> = ({
+  content,
+  scrollRef,
+  settings,
+}) => {
+  const { themeConfig } = useTheme();
 
-const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
+  // Initialize active heading detection
+  useActiveHeading();
+
+  // Define markdown components with access to theme
+  const markdownComponents = {
+    // Enhanced code blocks with syntax highlighting
+    code: (props: CodeProps) => {
+      const { inline, className, children } = props;
+
+      if (inline) {
+        return (
+          <code className="text-pink-600 bg-pink-50 px-2 py-1 rounded-md text-sm font-mono">
+            {children}
+          </code>
+        );
+      }
+
+      // Check if this is a mermaid code block or has a language
+      const match = /language-(\w+)/.exec(className || "");
+      const language = match ? match[1] : "";
+      const code = String(children).replace(/\n$/, "");
+
+      if (language === "mermaid") {
+        const id = Math.random().toString(36).substr(2, 9);
+        return <MermaidDiagram code={code} id={id} />;
+      }
+
+      // If we have a language, use syntax highlighting
+      if (language) {
+        return (
+          <div className="code-block-container my-4">
+            <div className="flex items-center justify-between px-4 py-2 theme-surface-secondary border theme-border rounded-t-lg">
+              <span className="text-sm font-medium theme-text-secondary">
+                {language}
+              </span>
+              <button
+                onClick={() => copyToClipboard(code)}
+                className="inline-flex items-center px-2 py-1 text-xs font-medium rounded theme-text-secondary hover:bg-opacity-80 transition-colors"
+                title="Copy code"
+              >
+                <svg
+                  className="w-3 h-3 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+                Copy
+              </button>
+            </div>
+            <SyntaxHighlighter
+              language={language}
+              style={themeConfig.type === "dark" ? oneDark : oneLight}
+              customStyle={{
+                margin: 0,
+                borderRadius: "0 0 8px 8px",
+                border: "1px solid var(--border-color)",
+                borderTop: "none",
+              }}
+              showLineNumbers={true}
+              wrapLines={true}
+              lineNumberStyle={{
+                minWidth: "3em",
+                paddingRight: "1em",
+                textAlign: "right",
+                userSelect: "none",
+              }}
+            >
+              {code}
+            </SyntaxHighlighter>
+          </div>
+        );
+      }
+
+      // Fallback for code without language
+      return <code className={className}>{children}</code>;
+    },
+    // Keep all the other components the same...
+    h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h1
+        {...props}
+        className="text-3xl font-bold theme-text mb-4 mt-6 pb-2 border-b theme-border"
+      />
+    ),
+    h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h2 {...props} className="text-2xl font-semibold theme-text mb-3 mt-5" />
+    ),
+    h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h3 {...props} className="text-xl font-semibold theme-text mb-3 mt-4" />
+    ),
+    h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h4 {...props} className="text-lg font-semibold theme-text mb-2 mt-3" />
+    ),
+    h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h5 {...props} className="text-base font-semibold theme-text mb-2 mt-3" />
+    ),
+    h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+      <h6 {...props} className="text-sm font-semibold theme-text mb-2 mt-2" />
+    ),
+    p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
+      <p {...props} className="theme-text mb-4 leading-relaxed" />
+    ),
+    a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+      <a {...props} className="text-blue-600 hover:text-blue-800 underline" />
+    ),
+    blockquote: (props: React.HTMLAttributes<HTMLElement>) => (
+      <blockquote
+        {...props}
+        className="border-l-4 border-blue-500 pl-4 italic theme-text-secondary my-4"
+      />
+    ),
+    ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
+      <ul
+        {...props}
+        className="list-disc list-inside theme-text mb-4 space-y-1"
+      />
+    ),
+    ol: (props: React.HTMLAttributes<HTMLOListElement>) => (
+      <ol
+        {...props}
+        className="list-decimal list-inside theme-text mb-4 space-y-1"
+      />
+    ),
+    li: (props: React.HTMLAttributes<HTMLLIElement>) => (
+      <li {...props} className="theme-text" />
+    ),
+
+    strong: (props: React.HTMLAttributes<HTMLElement>) => (
+      <strong {...props} className="font-bold" />
+    ),
+    em: (props: React.HTMLAttributes<HTMLElement>) => (
+      <em {...props} className="italic" />
+    ),
+    img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+      <img {...props} className="max-w-full h-auto rounded-lg my-4 shadow-md" />
+    ),
+    hr: (props: React.HTMLAttributes<HTMLHRElement>) => (
+      <hr {...props} className="border-t theme-border my-6" />
+    ),
+    // Enhanced task lists
+    input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+      <input
+        {...props}
+        className="mr-3 w-4 h-4 accent-blue-600 rounded"
+        disabled
+      />
+    ),
+    // Enhanced tables with responsive features
+    table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+      <div
+        className="overflow-x-auto my-6 rounded-lg border theme-border shadow-sm"
+        role="region"
+        aria-label="Table content"
+        tabIndex={0}
+      >
+        <table
+          {...props}
+          className={`min-w-full divide-y theme-border ${
+            settings.tableZebraStripes ? "table-zebra" : ""
+          }`}
+        />
+      </div>
+    ),
+    thead: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+      <thead {...props} className="theme-surface-secondary" />
+    ),
+    tbody: (props: React.HTMLAttributes<HTMLTableSectionElement>) => (
+      <tbody {...props} />
+    ),
+    tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
+      <tr {...props} className="border-b theme-border" />
+    ),
+    th: (props: React.ThHTMLAttributes<HTMLTableHeaderCellElement>) => {
+      // Extract text alignment from style or className
+      const getAlignment = () => {
+        const style = props.style?.textAlign;
+        const className = props.className;
+
+        if (style === "center" || className?.includes("text-center"))
+          return "center";
+        if (style === "right" || className?.includes("text-right"))
+          return "right";
+        return "left";
+      };
+
+      const alignment = getAlignment();
+
+      // Alignment indicator icons
+      const AlignmentIcon = () => {
+        if (!settings.tableAlignmentIndicators) return null;
+
+        const iconClass = "w-3 h-3 ml-1 theme-text-muted";
+
+        switch (alignment) {
+          case "center":
+            return (
+              <svg
+                className={iconClass}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                />
+              </svg>
+            );
+          case "right":
+            return (
+              <svg
+                className={iconClass}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            );
+          default:
+            return (
+              <svg
+                className={iconClass}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            );
+        }
+      };
+
+      return (
+        <th
+          {...props}
+          className={`px-6 py-3 theme-surface text-${alignment} text-xs font-semibold theme-text uppercase tracking-wider border-b theme-border`}
+        >
+          <div className="flex items-center justify-start">
+            {props.children}
+            <AlignmentIcon />
+          </div>
+        </th>
+      );
+    },
+    td: (props: React.TdHTMLAttributes<HTMLTableDataCellElement>) => {
+      return (
+        <td
+          {...props}
+          className="px-6 py-4 text-sm theme-text-secondary border-b theme-border"
+        >
+          {processLineBreaks(props.children as string)}
+        </td>
+      );
+    },
+    // Enhanced code pre blocks
+    pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
+      <pre
+        {...props}
+        className="theme-surface-secondary theme-text rounded-lg p-4 overflow-x-auto shadow-lg border theme-border my-4"
+      />
+    ),
+  };
+
   const handleCopyHTML = async () => {
     // Get the rendered HTML from the preview content
     const previewElement = scrollRef?.current?.querySelector(".max-w-none");
@@ -207,7 +378,7 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
   };
 
   return (
-    <div className="flex-1 flex flex-col theme-background min-h-0 shadow-sm">
+    <div className="flex-1 flex flex-col min-w-0 theme-background min-h-0 shadow-sm">
       {/* Enhanced Preview Header */}
       <div className="theme-surface border-b theme-border px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
@@ -264,16 +435,51 @@ const PreviewPane: React.FC<PreviewPaneProps> = ({ content, scrollRef }) => {
         <div
           ref={scrollRef}
           className="flex-1 overflow-auto theme-background min-h-0"
+          data-testid="preview-content"
         >
           <div className="p-6">
             <div className="max-w-none text-left">
               {content ? (
-                <Markdown
-                  remarkPlugins={[remarkGfm]}
-                  components={markdownComponents}
-                >
-                  {content}
-                </Markdown>
+                <ErrorBoundary>
+                  <Markdown
+                    remarkPlugins={[
+                      remarkGfm,
+                      remarkMath,
+                      remarkEmoji,
+                      remarkFrontmatter,
+                    ]}
+                    rehypePlugins={[
+                      rehypeSlug, // Add ID attributes to headings
+                      [
+                        rehypeAutolinkHeadings,
+                        {
+                          behavior: "prepend",
+                          properties: {
+                            className: ["heading-link"],
+                            ariaLabel: "Link to heading",
+                            title: "Link to this heading",
+                          },
+                          content: {
+                            type: "text",
+                            value: "🔗",
+                          },
+                        },
+                      ],
+                      [
+                        rehypeKatex,
+                        {
+                          // Configure KaTeX options for better error handling
+                          throwOnError: false, // Don't throw on math errors
+                          errorColor: "#cc0000", // Red color for math errors
+                          strict: false, // Allow some non-standard LaTeX
+                        },
+                      ],
+                    ]}
+                    components={markdownComponents}
+                  >
+                    {content}
+                  </Markdown>
+                </ErrorBoundary>
               ) : (
                 <div className="flex flex-col items-center justify-center h-64 text-center">
                   <div className="w-16 h-16 theme-surface rounded-full flex items-center justify-center mb-4">

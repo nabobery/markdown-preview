@@ -74,10 +74,32 @@ export interface AppSettings {
   wordWrap: boolean;
   autoSave: boolean;
   autoSaveInterval: number;
+  // Enhanced Table Features
+  tableZebraStripes: boolean;
+  tableAlignmentIndicators: boolean;
+  // Table of Contents Features
+  showTableOfContents: boolean;
+  tocPosition: "left" | "right";
+  tocMaxLevel: number;
 }
 
 export interface MarkdownFile {
   name: string;
   content: string;
   lastModified: Date;
+}
+
+export interface TOCHeading {
+  id: string;
+  text: string;
+  level: number;
+  slug: string;
+}
+
+export interface TOCContextType {
+  headings: TOCHeading[];
+  setHeadings: (headings: TOCHeading[]) => void;
+  scrollToHeading: (id: string) => void;
+  activeHeading: string | null;
+  setActiveHeading: (id: string | null) => void;
 }
