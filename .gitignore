@@ -26,3 +26,5 @@ dist-ssr
 *.md
 
 !**/README.md
+!**/AGENTS.md
+!**/CLAUDE.md
